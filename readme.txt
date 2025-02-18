@@ -4,7 +4,7 @@ Tags: TikTok, tiktok feed, tiktok video, tiktok plugin, tiktok gallery
 Requires at least: 5.6
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -183,19 +183,23 @@ Please review the terms of use and privacy policy of TikTok to understand how yo
 7. 100% Responsive on all devices
 
 == Changelog ==
-1.1.3 ( Date: 04 December, 2024 )
+1.1.4
+- Fixed TikTok feed display issue on mobile devices
+- Improve popup button display in responsive mode
+
+1.1.3
 - Fixed an issue with TikTok feed filters on mobile devices
 - Improved accessibility for the TikTok feed
 
-1.1.2 ( Date: 07 October, 2024 )
+1.1.2
 - Fixed optimize profile photo invalid url issue
 - Fixed unknown error message display issue
 
-1.1.1 ( Date: 23 September, 2024 )
+1.1.1
 - Resolved an issue with the display of TikTok Feed user names and images on animated backgrounds.
 - Preloader in feed templates not disappearing after storing images locally has been resolved. Preloader now correctly disappears after images are successfully stored.
 
-1.1.0 ( Date: 18 September, 2024 )
+1.1.0
 • Added Optimize Images settings option in Settings -> Feed Platforms -> TikTok Settings. This feature automatically saves local copies of TikTok feed images on your server for better performance.
 • Added TikTok Feed GDPR compliant settings option in Settings -> Advanced Settings.
 • Added an option to reset Optimize Images settings in Settings -> Feed Platforms -> TikTok Settings
@@ -204,5 +208,5 @@ Please review the terms of use and privacy policy of TikTok to understand how yo
 • Enhanced error handling and added more descriptive error messages for TikTok Feed issues.
 • Added automated email notification alerts for critical TikTok Feed issues. You will receive an email notification if any unresolved issues with a TikTok feed arise on your website.
 
-1.0.0 ( Date: March 12, 2024 )
+1.0.0
 - init the first release

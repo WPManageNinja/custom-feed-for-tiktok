@@ -83,10 +83,6 @@ class ShortcodeHandler
             wp_enqueue_script('wpsr-image-resizer');
         }
 
-//        if (Arr::get($image_settings, 'optimized_images', 'false') === 'true' || Arr::get($settings['feed_settings'], 'pagination_settings.pagination_type') != 'none' || Arr::get($settings['feed_settings'], 'post_settings.display_mode') === 'popup') {
-//            $this->enqueueScripts();
-//        }
-
         $shortcodeHandler->enqueueScripts();
         do_action('wpsocialreviews/load_template_assets', $templateId);
 
