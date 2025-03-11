@@ -37,7 +37,7 @@ class TikTokWidget extends OxygenEl
         $templates_control = $this->addOptionControl(
             array(
                 'type' 		=> 'dropdown',
-                'name' 		=> __('Select Template' , "wp-social-reviews"),
+                'name' 		=> __('Select Template' , "custom-feed-for-tiktok"),
                 'slug' 		=> 'wpsr_tiktok',
                 'value' 	=> $templates,
                 'default' 	=> "no",
@@ -49,37 +49,37 @@ class TikTokWidget extends OxygenEl
         /*****************************
          * Header
          *****************************/
-        $tiktok_header_section = $this->addControlSection( "wpsr_tiktok_header_section", __("Header", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_header_section = $this->addControlSection( "wpsr_tiktok_header_section", __("Header", "custom-feed-for-tiktok"), "assets/icon.png", $this );
 
         /*****************************
          * Header username
          *****************************/
-        $tiktok_header_un = $tiktok_header_section->addControlSection( "wpsr_tiktok_header_username_section", __("Username", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_header_un = $tiktok_header_section->addControlSection( "wpsr_tiktok_header_username_section", __("Username", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $tiktok_header_un->addStyleControls(
             array(
                 array(
-                    "name" 				=> __('Color', "wp-social-reviews"),
+                    "name" 				=> __('Color', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-info-name-wrapper a',
                     "property" 			=> 'color',
                 ),
                 array(
-                    "name" 				=> __('Font Size', "wp-social-reviews"),
+                    "name" 				=> __('Font Size', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-info-name-wrapper a',
                     "property" 			=> 'font-size',
                     'control_type' 		=> 'slider-measurebox'
                 ),
                 array(
-                    "name" 				=> __('Font Weight', "wp-social-reviews"),
+                    "name" 				=> __('Font Weight', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-info-name-wrapper a',
                     "property" 			=> 'font-weight',
                 ),
                 array(
-                    "name" 				=> __('Line Height', "wp-social-reviews"),
+                    "name" 				=> __('Line Height', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-info-name-wrapper a',
                     "property" 			=> 'line-height',
                 ),
                 array(
-                    "name" 				=> __('Bottom Spacing', "wp-social-reviews"),
+                    "name" 				=> __('Bottom Spacing', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-info-name-wrapper a',
                     "property" 			=> 'margin-bottom',
                     "control_type" 		=> 'slider-measurebox',
@@ -91,27 +91,27 @@ class TikTokWidget extends OxygenEl
         /*****************************
          * Header description
          *****************************/
-        $tiktok_header_des = $tiktok_header_section->addControlSection( "wpsr_tiktok_header_des_section", __("Description", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_header_des = $tiktok_header_section->addControlSection( "wpsr_tiktok_header_des_section", __("Description", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $tiktok_header_des->addStyleControls(
             array(
                 array(
-                    "name" 				=> __('Color', "wp-social-reviews"),
+                    "name" 				=> __('Color', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-info-description p',
                     "property" 			=> 'color',
                 ),
                 array(
-                    "name" 				=> __('Font Size', "wp-social-reviews"),
+                    "name" 				=> __('Font Size', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-info-description p',
                     "property" 			=> 'font-size',
                     'control_type' 		=> 'slider-measurebox'
                 ),
                 array(
-                    "name" 				=> __('Font Weight', "wp-social-reviews"),
+                    "name" 				=> __('Font Weight', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-info-description p',
                     "property" 			=> 'font-weight',
                 ),
                 array(
-                    "name" 				=> __('Line Height', "wp-social-reviews"),
+                    "name" 				=> __('Line Height', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-info-description p',
                     "property" 			=> 'line-height',
                 )
@@ -121,27 +121,27 @@ class TikTokWidget extends OxygenEl
         /*****************************
          * Header statistics
          *****************************/
-        $tiktok_header_stat = $tiktok_header_section->addControlSection( "wpsr_tiktok_header_stat_section", __("Statistics", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_header_stat = $tiktok_header_section->addControlSection( "wpsr_tiktok_header_stat_section", __("Statistics", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $tiktok_header_stat->addStyleControls(
             array(
                 array(
-                    "name" 				=> __('Text Color', "wp-social-reviews"),
+                    "name" 				=> __('Text Color', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-statistics span',
                     "property" 			=> 'color',
                 ),
                 array(
-                    "name" 				=> __('Font Size', "wp-social-reviews"),
+                    "name" 				=> __('Font Size', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-statistics span',
                     "property" 			=> 'font-size',
                     'control_type' 		=> 'slider-measurebox'
                 ),
                 array(
-                    "name" 				=> __('Font Weight', "wp-social-reviews"),
+                    "name" 				=> __('Font Weight', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-statistics span',
                     "property" 			=> 'font-weight',
                 ),
                 array(
-                    "name" 				=> __('Line Height', "wp-social-reviews"),
+                    "name" 				=> __('Line Height', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-statistics span',
                     "property" 			=> 'line-height',
                 )
@@ -151,7 +151,7 @@ class TikTokWidget extends OxygenEl
         /*****************************
          * Header Box
          *****************************/
-        $tiktok_header_box = $tiktok_header_section->addControlSection( "wpsr_tiktok_header_box_section", __("Box", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_header_box = $tiktok_header_section->addControlSection( "wpsr_tiktok_header_box_section", __("Box", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $tiktok_header_box->addStyleControls(
             array(
                 array(
@@ -194,41 +194,41 @@ class TikTokWidget extends OxygenEl
         /*****************************
          * Content
          *****************************/
-        $tiktok_content_section = $this->addControlSection( "wpsr_tiktok_content_section", __("Content", "wp-social-reviews"), "assets/icon.png", $this );
-        $tiktok_content_section->typographySection( __('Post Text'), '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-feed-description-link .wpsr-feed-description-text', $this );
+        $tiktok_content_section = $this->addControlSection( "wpsr_tiktok_content_section", __("Content", "custom-feed-for-tiktok"), "assets/icon.png", $this );
+        $tiktok_content_section->typographySection( __('Post Text', 'custom-feed-for-tiktok'), '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-feed-description-link .wpsr-feed-description-text', $this );
         $tiktok_content_section->addPreset(
             "padding",
             "wpsr_tiktok_content_padding",
-            __("Padding", "wp-social-reviews"),
+            __("Padding", "custom-feed-for-tiktok"),
             '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-feed-description-link .wpsr-feed-description-text'
         )->whiteList();
 
-        $tiktok_author_section = $tiktok_content_section->addControlSection( "wpsr_tiktok_author_section", __("Author", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_author_section = $tiktok_content_section->addControlSection( "wpsr_tiktok_author_section", __("Author", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $tiktok_author_section->addStyleControls(
             array(
                 array(
-                    "name" 				=> __('Color', "wp-social-reviews"),
+                    "name" 				=> __('Color', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-author-name',
                     "property" 			=> 'color',
                 ),
                 array(
-                    "name" 				=> __('Font Size', "wp-social-reviews"),
+                    "name" 				=> __('Font Size', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-author-name',
                     "property" 			=> 'font-size',
                     'control_type' 		=> 'slider-measurebox'
                 ),
                 array(
-                    "name" 				=> __('Font Weight', "wp-social-reviews"),
+                    "name" 				=> __('Font Weight', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-author-name',
                     "property" 			=> 'font-weight',
                 ),
                 array(
-                    "name" 				=> __('Line Height', "wp-social-reviews"),
+                    "name" 				=> __('Line Height', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-author-name',
                     "property" 			=> 'line-height',
                 ),
                 array(
-                    "name" 				=> __('Bottom Spacing', "wp-social-reviews"),
+                    "name" 				=> __('Bottom Spacing', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-author-name',
                     "property" 			=> 'margin-bottom',
                     "control_type" 		=> 'slider-measurebox',
@@ -237,32 +237,32 @@ class TikTokWidget extends OxygenEl
             )
         );
 
-        $tiktok_date_section = $tiktok_content_section->addControlSection( "wpsr_tiktok_date_section", __("Date", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_date_section = $tiktok_content_section->addControlSection( "wpsr_tiktok_date_section", __("Date", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $tiktok_date_section->addStyleControls(
             array(
                 array(
-                    "name" 				=> __('Color', "wp-social-reviews"),
+                    "name" 				=> __('Color', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-time',
                     "property" 			=> 'color',
                 ),
                 array(
-                    "name" 				=> __('Font Size', "wp-social-reviews"),
+                    "name" 				=> __('Font Size', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-time',
                     "property" 			=> 'font-size',
                     'control_type' 		=> 'slider-measurebox'
                 ),
                 array(
-                    "name" 				=> __('Font Weight', "wp-social-reviews"),
+                    "name" 				=> __('Font Weight', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-time',
                     "property" 			=> 'font-weight',
                 ),
                 array(
-                    "name" 				=> __('Line Height', "wp-social-reviews"),
+                    "name" 				=> __('Line Height', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-time',
                     "property" 			=> 'line-height',
                 ),
                 array(
-                    "name" 				=> __('Bottom Spacing', "wp-social-reviews"),
+                    "name" 				=> __('Bottom Spacing', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-time',
                     "property" 			=> 'margin-bottom',
                     "control_type" 		=> 'slider-measurebox',
@@ -271,32 +271,32 @@ class TikTokWidget extends OxygenEl
             )
         );
 
-        $tiktok_statistics_count_section = $tiktok_content_section->addControlSection( "wpsr_tiktok_statistics_count_section", __("Statistics Count", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_statistics_count_section = $tiktok_content_section->addControlSection( "wpsr_tiktok_statistics_count_section", __("Statistics Count", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $tiktok_statistics_count_section->addStyleControls(
             array(
                 array(
-                    "name" 				=> __('Color', "wp-social-reviews"),
+                    "name" 				=> __('Color', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-statistics .wpsr-tiktok-feed-reaction-count',
                     "property" 			=> 'color',
                 ),
                 array(
-                    "name" 				=> __('Font Size', "wp-social-reviews"),
+                    "name" 				=> __('Font Size', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-statistics .wpsr-tiktok-feed-reaction-count',
                     "property" 			=> 'font-size',
                     'control_type' 		=> 'slider-measurebox'
                 ),
                 array(
-                    "name" 				=> __('Font Weight', "wp-social-reviews"),
+                    "name" 				=> __('Font Weight', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-statistics .wpsr-tiktok-feed-reaction-count',
                     "property" 			=> 'font-weight',
                 ),
                 array(
-                    "name" 				=> __('Line Height', "wp-social-reviews"),
+                    "name" 				=> __('Line Height', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-statistics .wpsr-tiktok-feed-reaction-count',
                     "property" 			=> 'line-height',
                 ),
                 array(
-                    "name" 				=> __('Bottom Spacing', "wp-social-reviews"),
+                    "name" 				=> __('Bottom Spacing', "custom-feed-for-tiktok"),
                     "selector" 			=> '.wpsr-tiktok-feed-wrapper .wpsr-tiktok-feed-item .wpsr-tiktok-feed-statistics .wpsr-tiktok-feed-reaction-count',
                     "property" 			=> 'margin-bottom',
                     "control_type" 		=> 'slider-measurebox',
@@ -309,10 +309,10 @@ class TikTokWidget extends OxygenEl
         /*****************************
          *follow btn
          *****************************/
-        $tiktok_follow_section = $this->addControlSection( "wpsr_tiktok_follow_section", __("Follow Button", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_follow_section = $this->addControlSection( "wpsr_tiktok_follow_section", __("Follow Button", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $tiktok_follow_section_fz = $tiktok_follow_section->addStyleControl(
             array(
-                "name" 				=> __('Font Size', "wp-social-reviews"),
+                "name" 				=> __('Font Size', "custom-feed-for-tiktok"),
                 "selector" 			=> '.wpsr-tiktok-feed-follow-button-group .wpsr-tiktok-feed-btn a',
                 "property" 			=> 'font-size',
                 'control_type' 		=> 'slider-measurebox'
@@ -349,8 +349,8 @@ class TikTokWidget extends OxygenEl
         /*****************************
          * Pagination
          *****************************/
-        $pagination_section = $this->addControlSection( "wpsr_tiktok_pagination_section", __("Pagination", "wp-social-reviews"), "assets/icon.png", $this );
-        $pagination_section->typographySection( __('Typography'), '.wpsr_more', $this );
+        $pagination_section = $this->addControlSection( "wpsr_tiktok_pagination_section", __("Pagination", "custom-feed-for-tiktok"), "assets/icon.png", $this );
+        $pagination_section->typographySection( __('Typography', 'custom-feed-for-tiktok'), '.wpsr_more', $this );
         $pagination_section->addStyleControls(
             array(
                 array(
@@ -375,7 +375,7 @@ class TikTokWidget extends OxygenEl
             '.wpsr_more'
         )->whiteList();
 
-        $pagination_section_border = $pagination_section->addControlSection( "wpsr_tiktok_pagination_border_section", __("Border", "wp-social-reviews"), "assets/icon.png", $this );
+        $pagination_section_border = $pagination_section->addControlSection( "wpsr_tiktok_pagination_border_section", __("Border", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $pagination_section_border->addPreset(
             "border",
             "wpsr_tiktok_pagination_border",
@@ -393,7 +393,7 @@ class TikTokWidget extends OxygenEl
         /*****************************
          * Box
          *****************************/
-        $tiktok_box_section = $this->addControlSection( "wpsr_tiktok_box_section", __("Item Box", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_box_section = $this->addControlSection( "wpsr_tiktok_box_section", __("Item Box", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $selector = '.wpsr-tiktok-feed-item .wpsr-tiktok-feed-inner';
         $tiktok_box_section->addStyleControls(
             array(
@@ -404,7 +404,7 @@ class TikTokWidget extends OxygenEl
                 )
             )
         );
-        $tiktok_box_sp = $tiktok_box_section->addControlSection( "wpsr_tiktok_box_sp_section", __("Spacing", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_box_sp = $tiktok_box_section->addControlSection( "wpsr_tiktok_box_sp_section", __("Spacing", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $tiktok_box_sp->addPreset(
             "padding",
             "tiktok_box_padding",
@@ -419,7 +419,7 @@ class TikTokWidget extends OxygenEl
             $selector
         )->whiteList();
 
-        $tiktok_box_border = $tiktok_box_section->addControlSection( "wpsr_tiktok_box_border_section", __("Border", "wp-social-reviews"), "assets/icon.png", $this );
+        $tiktok_box_border = $tiktok_box_section->addControlSection( "wpsr_tiktok_box_border_section", __("Border", "custom-feed-for-tiktok"), "assets/icon.png", $this );
         $tiktok_box_border->addPreset(
             "border",
             "tiktok_box_border",

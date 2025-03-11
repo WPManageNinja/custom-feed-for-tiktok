@@ -357,14 +357,17 @@ class TiktokFeed extends BaseFeed
                 $userName = Arr::get($connectedAccount, 'display_name');
 
                 if (empty($errorMessage)) {
+                    // translators: %s: Account username or display name
                     $errorMessage = sprintf(__('There has been a problem with your account (%s). Please reconnect your account.', 'custom-feed-for-tiktok'), $userName);
                 }
 
                 if($has_account_error_code === 401){
+                    // translators: %s: Account username or display name
                     $errorMessage = sprintf(__('There has been a problem with your account (%s). The user has not authorized application or revoked permission. Please reconnect your account.', 'custom-feed-for-tiktok'), $userName);
                 }
 
                 if($has_account_error_code === 'invalid_grant'){
+                    // translators: %s: Account username or display name
                     $errorMessage =  sprintf(__('There has been a problem with your account(%s). Your access token is invalid has expired. Please reconnect your account. Otherwise, the feed will no longer work.', 'custom-feed-for-tiktok'), $userName);
                 }
                 $errorData = [
@@ -424,7 +427,7 @@ class TiktokFeed extends BaseFeed
         if($has_gdpr === "true" && $optimized_images == "false") {
             $settings['dynamic']['items'] = [];
             $settings['dynamic']['header'] = [];
-            $settings['dynamic']['error_message']['error_message'] = __('TikTok feeds are not being displayed due to the "optimize images" option being disabled. If the GDPR settings are set to "Yes," it is necessary to enable the optimize images option.', 'wp-social-reviews');
+            $settings['dynamic']['error_message']['error_message'] = __('TikTok feeds are not being displayed due to the "optimize images" option being disabled. If the GDPR settings are set to "Yes," it is necessary to enable the optimize images option.', 'custom-feed-for-tiktok');
         }
 
         return $settings;
@@ -538,9 +541,10 @@ class TiktokFeed extends BaseFeed
                 }
             }
             else{
-                $base_error_message = __('The account ID(%s) associated with your configuration settings has been deleted. To view your feed from this account, please reauthorize and reconnect it.', 'wp-social-reviews');
+                // translators: %s: Account ID linked to the configuration
+                $base_error_message = __('The account ID (%s) linked to your configuration has been deleted. To continue displaying your feed from this account, please reauthorize and reconnect it in the configuration settings. Then, go to the template editor, navigate to Source → Select Account, and choose the account again.', 'custom-feed-for-tiktok');
                 if ($multipleAccountsConnected) {
-                    $error_message = __('There are multiple accounts being used on this template. ', 'wp-social-reviews') . sprintf($base_error_message, $id);
+                    $error_message = __('There are multiple accounts being used on this template. ', 'custom-feed-for-tiktok') . sprintf($base_error_message, $id);
                 } else {
                     $error_message = sprintf($base_error_message, $id);
                 }
