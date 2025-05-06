@@ -2,7 +2,7 @@
 Contributors: techjewel, devutpol, tanjimtc71, wpmanageninja
 Tags: TikTok, tiktok feed, tiktok video, tiktok plugin, tiktok gallery
 Requires at least: 5.6
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 7.4
 Stable tag: 1.1.5
 License: GPLv2 or later
