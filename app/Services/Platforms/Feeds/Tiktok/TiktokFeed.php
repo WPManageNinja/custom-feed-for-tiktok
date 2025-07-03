@@ -303,7 +303,7 @@ class TiktokFeed extends BaseFeed
         $cache_names = [
             'user_account_header_' . $userId,
             'user_feed_id_' . $userId,
-//            'specific_videos_id_' . $userId,
+           'specific_videos_id_' . $userId,
         ];
 
         foreach ($cache_names as $cache_name) {
@@ -612,31 +612,37 @@ class TiktokFeed extends BaseFeed
             $pages++;
         }
 
-        $accountCacheName  = $feedType.'_id_'.$accountId.'_num_'.$totalFeed;
+        if ($feedType === 'user_feed') {
+            $accountCacheName  = $feedType.'_id_'.$accountId.'_num_'.$totalFeed;
+        }
+        else if ($feedType === 'specific_videos') {
+            
+            $apiSpecificVideos = Arr::get($apiSettings, 'specific_videos', '');
+            
+            $video_ids = array_map('trim', explode(',', $apiSpecificVideos));
 
-//        elseif ($feedType === 'specific_videos') {
-//            $apiSpecificVideos = Arr::get($apiSettings, 'specific_videos', []);
-//            $video_ids = array_map('trim', explode(',', $apiSpecificVideos));
-//
-//            $cached_video_ids = get_option('wpsr_tiktok_specific_video_ids', []);
-//
-//            $difference1 = array_diff($video_ids, $cached_video_ids);
-//            $difference2 = array_diff($cached_video_ids, $video_ids);
-//
-//            $accountCacheName = $feedType . '_id_' . $accountId . '_video_ids_' . count($video_ids);
-//
-//            if (!empty($difference1) && !empty($difference2)) {
-//                if(!empty($cached_video_ids)){
-//                    $this->cacheHandler->clearCacheByName($accountCacheName);
-//                }
-//                $cache = false;
-//            }
-//
-//            if($cached_video_ids !== $video_ids) {
-//                update_option('wpsr_tiktok_specific_video_ids', $video_ids);
-//            }
-//
-//        }
+            $cached_video_ids = get_option('wpsr_tiktok_specific_video_ids', []);
+
+            if($cached_video_ids && !is_array($cached_video_ids)) {
+                $cached_video_ids = explode(',', $cached_video_ids);
+            }
+
+            $difference1 = array_diff($video_ids, $cached_video_ids);
+            $difference2 = array_diff($cached_video_ids, $video_ids);
+
+            $accountCacheName = $feedType . '_id_' . $accountId . '_video_ids_' . count($video_ids);
+
+            if (!empty($difference1) && !empty($difference2)) {
+                if(!empty($cached_video_ids)){
+                    $this->cacheHandler->clearCacheByName($accountCacheName);
+                }
+                $cache = false;
+            }
+
+            if($cached_video_ids !== $video_ids) {
+                update_option('wpsr_tiktok_specific_video_ids', $video_ids);
+            }
+        }
 
         $feeds = [];
         if(!$cache) {
@@ -658,25 +664,24 @@ class TiktokFeed extends BaseFeed
                     'max_count' => $perPage
                 ];
             }
-//            elseif ($feedType === 'specific_videos') {
-//                $fields = apply_filters('custom_feed_for_tiktok/tiktok_specific_video_api_details', '');
-//                $fetchUrl = $this->remoteFetchUrl . $fields;
-//
-//                $video_ids = apply_filters('custom_feed_for_tiktok/tiktok_specific_video_ids', $apiSettings);
-//
-//                if (empty($video_ids)) {
-//                    return [
-//                        'error_message' => __('Please enter at least one video id', 'custom-feed-for-tiktok')
-//                    ];
-//                }
-//
-//                $request_data = json_encode(array(
-//                    "filters" => [
-//                        "video_ids" => $video_ids
-//                    ],
-//                    'max_count' => $perPage,
-//                ));
-//            }
+            elseif ($feedType === 'specific_videos') {
+                $fields = apply_filters('custom_feed_for_tiktok/tiktok_specific_video_api_details', '');
+                $fetchUrl = $this->remoteFetchUrl . $fields;
+                
+                $video_ids = apply_filters('custom_feed_for_tiktok/tiktok_specific_video_ids', $apiSettings);
+
+                if (empty($video_ids)) {
+                    return [
+                        'error_message' => __('Please enter at least one video id', 'custom-feed-for-tiktok')
+                    ];
+                }
+
+                $body_args = [
+                    "filters" => [
+                        "video_ids" => $video_ids
+                    ],
+                ];
+            }
 
             $account_data = $this->makeRequest($fetchUrl, $accessToken, $body_args);
             do_action( 'wpsocialreviews/tiktok_feed_api_connect_response', $account_data );
@@ -705,8 +710,9 @@ class TiktokFeed extends BaseFeed
             }
 
             if (Arr::get($account_data, 'response.code') === 200) {
-                $account_feeds = json_decode(wp_remote_retrieve_body($account_data), true);
 
+                $account_feeds = json_decode(wp_remote_retrieve_body($account_data), true);
+                
                 if (isset($account_feeds['data']) && !empty($account_feeds['data'])) {
                     $this->feedData = $account_feeds['data']['videos'];
 
@@ -955,48 +961,69 @@ class TiktokFeed extends BaseFeed
         $this->cacheHandler->clearPageCaches($this->platform);
         foreach ($caches as $index => $cache) {
             $optionName = $cache['option_name'];
-            $num_position = strpos($optionName, '_num_');
-            $total    = substr($optionName, $num_position + strlen('_num_'), strlen($optionName));
-
-            $feed_type  = '';
-            $separator        = '_feed';
-            $feed_position    = strpos($optionName, $separator) + strlen($separator);
-            $initial_position = 0;
-            if ($feed_position) {
-                $feed_type = substr($optionName, $initial_position, $feed_position - $initial_position);
+            $feed_type = '';
+            $sourceId = '';
+            $total = 0;
+            
+            // Extract feed type
+            if (strpos($optionName, 'user_feed_id_') !== false) {
+                $feed_type = 'user_feed';
+            } elseif (strpos($optionName, 'specific_videos_id_') !== false) {
+                $feed_type = 'specific_videos';
             }
 
-            $id_position = strpos($optionName, '_id_');
-            $sourceId    = substr($optionName, $id_position + strlen('_id_'),
-                $num_position - ($id_position + strlen('_id_')));
-
-//            $feedTypes = ['user_feed', 'specific_videos'];
-            $feedTypes = ['user_feed'];
-            $connectedSources = $this->getConnectedSourceList();
-            if(in_array($feed_type, $feedTypes)) {
-                if(isset($connectedSources[$sourceId])) {
-                    $account = $connectedSources[$sourceId];
-                    $this->maybeRefreshToken($account);
-                    $apiSettings['feed_type'] = $feed_type;
-                    $apiSettings['feed_count'] = $total;
-                    $this->getAccountFeed($account, $apiSettings, true);
+            $apiSettings = [];
+            
+            // Extract source ID based on feed type
+            if ($feed_type === 'user_feed') {
+                $accountIdStart = strpos($optionName, 'user_feed_id_') + strlen('user_feed_id_');
+                if (strpos($optionName, '_num_') !== false) {
+                    $numPosition = strpos($optionName, '_num_');
+                    $sourceId = substr($optionName, $accountIdStart, $numPosition - $accountIdStart);
+                    $total = substr($optionName, $numPosition + strlen('_num_'));
                 }
+
+                $apiSettings = [
+                    'feed_type' => $feed_type,
+                    'feed_count' => $total
+                ];
+            } elseif ($feed_type === 'specific_videos') {
+                $accountIdStart = strpos($optionName, 'specific_videos_id_') + strlen('specific_videos_id_');
+                if (strpos($optionName, '_video_ids_') !== false) {
+                    $vidPosition = strpos($optionName, '_video_ids_');
+                    $sourceId = substr($optionName, $accountIdStart, $vidPosition - $accountIdStart);
+                    $total = substr($optionName, $vidPosition + strlen('_video_ids_'));
+                }
+                $specifiVideos = [];
+                $videos = Arr::get($cache, 'option_value.videos', []);
+
+                
+                foreach ($videos as $key => $value) {
+                    $specifiVideos[] = Arr::get($value, 'id', '');
+                }
+                $specifiVideos = implode(',', $specifiVideos);
+
+                $apiSettings = [
+                    'feed_type' => $feed_type,
+                    'feed_count' => $total,
+                    'specific_videos' => $specifiVideos
+                ];
             }
-
-            $accountIdStart = strpos($optionName, 'user_feed_id_') + strlen('user_feed_id_');
-            $numPosition = strpos($optionName, '_num_');
-            $accountId = substr($optionName, $accountIdStart, $numPosition - $accountIdStart);
-
-            if(!empty($accountId)) {
-                if(isset($connectedSources[$accountId])) {
-                    $account = $connectedSources[$accountId];
-                    $page_header_response = $this->getHeaderDetails($account, true);
-                    $hasApiError = Arr::get($page_header_response, 'error.message', '');
-                    if($hasApiError){
-                        $account['username'] = Arr::get($page_header_response, 'data.user.display_name', '');
-                        $connectedSources = $this->addPlatformApiErrors($page_header_response, $connectedSources, $account);
-                        update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
-                    }
+            
+            $connectedSources = $this->getConnectedSourceList();
+            if (!empty($sourceId) && isset($connectedSources[$sourceId])) {
+                $account = $connectedSources[$sourceId];
+                $this->maybeRefreshToken($account);
+                
+                $this->getAccountFeed($account, $apiSettings, true);
+                
+                // Update header details
+                $page_header_response = $this->getHeaderDetails($account, true);
+                $hasApiError = Arr::get($page_header_response, 'error.message', '');
+                if ($hasApiError) {
+                    $account['username'] = Arr::get($page_header_response, 'data.user.display_name', '');
+                    $connectedSources = $this->addPlatformApiErrors($page_header_response, $connectedSources, $account);
+                    update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
                 }
             }
         }
