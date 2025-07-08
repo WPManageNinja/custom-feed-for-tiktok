@@ -189,10 +189,35 @@ class TiktokFeed extends BaseFeed
             $expirationTime = Arr::get($existingData, 'expiration_time', 0);
             $current_time = current_time('timestamp', true);
             $refreshToken = Arr::get($existingData, 'refresh_token', '');
-            if ($expirationTime < $current_time) {
-                $accessToken = $this->refreshAccessToken($refreshToken, $userId);
+
+            // Check if token is expired or will expire within 1 hour (safety buffer)
+            $safetyBuffer = 3600; // 1 hour in seconds
+            if ($expirationTime < ($current_time + $safetyBuffer)) {
+                $refreshResult = $this->refreshAccessToken($refreshToken, $userId);
+
+                // Check if refresh was successful
+                if ($refreshResult && !is_array($refreshResult)) {
+                    // Refresh successful, use new token
+                    $accessToken = $refreshResult;
+                } else {
+                    // Refresh failed, clear expired token and return false to trigger re-authentication
+                    if (is_array($refreshResult) && isset($refreshResult['error_message'])) {
+                        error_log('TikTok refresh error: ' . $refreshResult['error_message']);
+                    }
+                    $this->clearExpiredToken($userId);
+                    return false;
+                }
+            } else {
+                // Token not expired, decrypt and return existing token
+                $accessToken = $this->protector->decrypt($accessToken);
+            }
+        } else {
+            // Decrypt the access token if it exists
+            if ($accessToken) {
+                $accessToken = $this->protector->decrypt($accessToken);
             }
         }
+
         return $accessToken;
     }
 
@@ -223,12 +248,27 @@ class TiktokFeed extends BaseFeed
         );
 
         $response = wp_remote_post($api_url, $args);
+
+        // Check for HTTP errors
+        if (is_wp_error($response)) {
+            error_log('TikTok token refresh HTTP error: ' . $response->get_error_message());
+            return false;
+        }
+
+        $responseCode = wp_remote_retrieve_response_code($response);
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
+
+        if ($responseCode !== 200) {
+            error_log('TikTok token refresh failed with status code: ' . $responseCode);
+            return false;
+        }
 
         if (isset($data['error_description'])) {
             $errorMessage = $data['error_description'];
             $errorCode = Arr::get($data, 'error');
+
+            error_log('TikTok token refresh API error: ' . $errorMessage);
 
             $data = [
                 'error_message'  => $errorMessage,
@@ -267,6 +307,25 @@ class TiktokFeed extends BaseFeed
         $mergedData = array_merge($existingData, $data);
         $sourceList[$userId] = $mergedData;
         update_option('wpsr_tiktok_connected_sources_config', ['sources' => $sourceList]);
+    }
+
+    /**
+     * Clear expired token data when refresh fails
+     */
+    private function clearExpiredToken($userId)
+    {
+        $sourceList = $this->getConnectedSourceList();
+        if (isset($sourceList[$userId])) {
+            // Mark token as expired and requiring re-authentication
+            $sourceList[$userId]['access_token'] = '';
+            $sourceList[$userId]['refresh_token'] = '';
+            $sourceList[$userId]['expiration_time'] = 0;
+            $sourceList[$userId]['token_expired'] = true;
+            $sourceList[$userId]['last_error'] = 'Token refresh failed - re-authentication required';
+            $sourceList[$userId]['last_error_time'] = time();
+
+            update_option('wpsr_tiktok_connected_sources_config', ['sources' => $sourceList]);
+        }
     }
 
     public function getVerificationConfigs()
@@ -586,6 +645,14 @@ class TiktokFeed extends BaseFeed
             'open_id' => $accountId
         ];
         $access_token = $this->maybeRefreshToken($account);
+
+        // Check if token refresh failed
+        if ($access_token === false) {
+            return [
+                'error_message' => __('TikTok access token has expired and refresh failed. Please reconnect your account.', 'custom-feed-for-tiktok')
+            ];
+        }
+
         if(isset($access_token['error_message'])){
             return [
                 'error' => $access_token
@@ -875,6 +942,23 @@ class TiktokFeed extends BaseFeed
     {
         $accountId         = Arr::get($account, 'open_id');
         $accessToken    = $this->protector->decrypt($account['access_token']) ? $this->protector->decrypt($account['access_token']) : $account['access_token'];
+
+        // Try to refresh token if needed
+        $refreshedToken = $this->maybeRefreshToken([
+            'access_token' => $accessToken,
+            'open_id' => $accountId
+        ]);
+
+        // Check if token refresh failed
+        if ($refreshedToken === false) {
+            return [
+                'error' => [
+                    'message' => __('TikTok access token has expired and refresh failed. Please reconnect your account.', 'custom-feed-for-tiktok')
+                ]
+            ];
+        }
+
+        $accessToken = $refreshedToken;
         $accountCacheName = 'user_account_header_'.$accountId;
 
         $accountData = [];
