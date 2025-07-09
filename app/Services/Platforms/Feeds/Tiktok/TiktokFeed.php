@@ -190,9 +190,9 @@ class TiktokFeed extends BaseFeed
             $current_time = current_time('timestamp', true);
             $refreshToken = Arr::get($existingData, 'refresh_token', '');
 
-            // Check if token is expired or will expire within 1 hour (safety buffer)
-            $safetyBuffer = 3600; // 1 hour in seconds
-            if ($expirationTime < ($current_time + $safetyBuffer)) {
+            // Check if token is actually expired (not just close to expiring)
+            if ($expirationTime < $current_time) {
+                // Token is expired, try to refresh
                 $refreshResult = $this->refreshAccessToken($refreshToken, $userId);
 
                 // Check if refresh was successful
@@ -200,12 +200,18 @@ class TiktokFeed extends BaseFeed
                     // Refresh successful, use new token
                     $accessToken = $refreshResult;
                 } else {
-                    // Refresh failed, clear expired token and return false to trigger re-authentication
+                    // Refresh failed, but try to use existing token anyway (might still work for a while)
                     if (is_array($refreshResult) && isset($refreshResult['error_message'])) {
                         error_log('TikTok refresh error: ' . $refreshResult['error_message']);
                     }
-                    $this->clearExpiredToken($userId);
-                    return false;
+                    // Decrypt and try existing token
+                    $accessToken = $this->protector->decrypt($accessToken);
+
+                    // Only fail if we have no token at all
+                    if (empty($accessToken)) {
+                        $this->clearExpiredToken($userId);
+                        return false;
+                    }
                 }
             } else {
                 // Token not expired, decrypt and return existing token
@@ -646,11 +652,10 @@ class TiktokFeed extends BaseFeed
         ];
         $access_token = $this->maybeRefreshToken($account);
 
-        // Check if token refresh failed
+        // Check if token refresh failed completely
         if ($access_token === false) {
-            return [
-                'error_message' => __('TikTok access token has expired and refresh failed. Please reconnect your account.', 'custom-feed-for-tiktok')
-            ];
+            // Try to use the original token as fallback
+            $access_token = $accessToken;
         }
 
         if(isset($access_token['error_message'])){
@@ -949,16 +954,11 @@ class TiktokFeed extends BaseFeed
             'open_id' => $accountId
         ]);
 
-        // Check if token refresh failed
-        if ($refreshedToken === false) {
-            return [
-                'error' => [
-                    'message' => __('TikTok access token has expired and refresh failed. Please reconnect your account.', 'custom-feed-for-tiktok')
-                ]
-            ];
+        // Use refreshed token if available, otherwise use original
+        if ($refreshedToken !== false) {
+            $accessToken = $refreshedToken;
         }
-
-        $accessToken = $refreshedToken;
+        // If refresh failed, we'll still try with the original token
         $accountCacheName = 'user_account_header_'.$accountId;
 
         $accountData = [];
