@@ -43,7 +43,7 @@ class Config
                 'source_settings'  => array(
                     'feed_type'         => Arr::get($settings, 'source_settings.feed_type', 'user_feed'),
                     'selected_accounts' => $selectedAccounts,
-                    'specific_videos'    => sanitize_text_field(Arr::get($settings,'source_settings.specific_videos', '')),
+                    'single_video_feed_ids'    => sanitize_text_field(Arr::get($settings,'source_settings.single_video_feed_ids', '')),
                     'feed_count'        => (int) Arr::get($settings, 'source_settings.feed_count', 50),
                 ),
                 'filters'  => array(

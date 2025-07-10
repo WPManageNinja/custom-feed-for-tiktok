@@ -689,35 +689,13 @@ class TiktokFeed extends BaseFeed
         if ($feedType === 'user_feed') {
             $accountCacheName  = $feedType.'_id_'.$accountId.'_num_'.$totalFeed;
         }
-        else if ($feedType === 'specific_videos') {
-            
-            $apiSpecificVideos = Arr::get($apiSettings, 'specific_videos', '');
+        else if ($feedType === 'single_video_feed') {
+            $apiSpecificVideos = Arr::get($apiSettings, 'single_video_feed_ids', '');
             
             $video_ids = array_map('trim', explode(',', $apiSpecificVideos));
 
-            $cached_video_ids = get_option('wpsr_tiktok_specific_video_ids', []);
-
-            if($cached_video_ids && !is_array($cached_video_ids)) {
-                $cached_video_ids = explode(',', $cached_video_ids);
-            }
-
-            $difference1 = array_diff($video_ids, $cached_video_ids);
-            $difference2 = array_diff($cached_video_ids, $video_ids);
-
             $accountCacheName = 'single_video_feed_id_' . $accountId .'_template_'.$this->postId. '_num_' . count($video_ids);
-
-            if (!empty($difference1) && !empty($difference2)) {
-                if(!empty($cached_video_ids)){
-                    $this->cacheHandler->clearCacheByName($accountCacheName);
-                }
-                $cache = false;
-            }
-
-            if($cached_video_ids !== $video_ids) {
-                update_option('wpsr_tiktok_specific_video_ids', $video_ids);
-            }
         }
-
         $feeds = [];
         if(!$cache) {
             $feeds = $this->cacheHandler->getFeedCache($accountCacheName);
@@ -738,12 +716,11 @@ class TiktokFeed extends BaseFeed
                     'max_count' => $perPage
                 ];
             }
-            elseif ($feedType === 'specific_videos') {
+            elseif ($feedType === 'single_video_feed') {
                 $fields = apply_filters('custom_feed_for_tiktok/tiktok_specific_video_api_details', '');
                 $fetchUrl = $this->remoteFetchUrl . $fields;
-                
-                $video_ids = apply_filters('custom_feed_for_tiktok/tiktok_specific_video_ids', $apiSettings);
 
+                $video_ids = apply_filters('custom_feed_for_tiktok/tiktok_specific_video_ids', $apiSettings);
                 if (empty($video_ids)) {
                     return [
                         'error_message' => __('Please enter at least one video id', 'custom-feed-for-tiktok')
@@ -1056,7 +1033,7 @@ class TiktokFeed extends BaseFeed
             if (strpos($optionName, 'user_feed_id_') !== false) {
                 $feed_type = 'user_feed';
             } elseif (strpos($optionName, 'single_video_feed_id_') !== false) {
-                $feed_type = 'specific_videos';
+                $feed_type = 'single_video_feed';
             }
 
             $apiSettings = [];
@@ -1074,7 +1051,7 @@ class TiktokFeed extends BaseFeed
                     'feed_type' => $feed_type,
                     'feed_count' => $total
                 ];
-            } elseif ($feed_type === 'specific_videos') {
+            } elseif ($feed_type === 'single_video_feed') {
                 $accountIdStart = strpos($optionName, 'single_video_feed_id_') + strlen('single_video_feed_id_');
 
                 if (strpos($optionName, '_template_') !== false) {
@@ -1094,18 +1071,18 @@ class TiktokFeed extends BaseFeed
                     $this->postId = '';
                 }
 
-                $specifiVideos = [];
+                $specificVideos = [];
                 $videos = Arr::get($cache, 'option_value.videos', []);
                 
                 foreach ($videos as $key => $value) {
-                    $specifiVideos[] = Arr::get($value, 'id', '');
+                    $specificVideos[] = Arr::get($value, 'id', '');
                 }
-                $specifiVideos = implode(',', $specifiVideos);
+                $specificVideos = implode(',', $specificVideos);
 
                 $apiSettings = [
                     'feed_type' => $feed_type,
                     'feed_count' => $total,
-                    'specific_videos' => $specifiVideos
+                    'single_video_feed' => $specificVideos
                 ];
             }
             
