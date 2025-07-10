@@ -1055,9 +1055,11 @@ class TiktokFeed extends BaseFeed
                 $accountIdStart = strpos($optionName, 'single_video_feed_id_') + strlen('single_video_feed_id_');
 
                 if (strpos($optionName, '_template_') !== false) {
-                    $vidPosition = strpos($optionName, '_template_');
-                    $sourceId = substr($optionName, $accountIdStart, $vidPosition - $accountIdStart);
-                    $total = substr($optionName, $vidPosition + strlen('_template_'));
+                    $numPosition = strpos($optionName, '_num_');
+                    $templatePosition = strpos($optionName, '_template_');
+
+                    $sourceId = substr($optionName, $accountIdStart, $templatePosition - $accountIdStart);
+                    $total = substr($optionName, $numPosition + strlen('_num_'));
                 }
 
                 // get post ID from the option name
@@ -1082,7 +1084,7 @@ class TiktokFeed extends BaseFeed
                 $apiSettings = [
                     'feed_type' => $feed_type,
                     'feed_count' => $total,
-                    'single_video_feed' => $specificVideos
+                    'single_video_feed_ids' => $specificVideos
                 ];
             }
             
