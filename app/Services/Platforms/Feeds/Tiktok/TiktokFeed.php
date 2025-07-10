@@ -390,6 +390,7 @@ class TiktokFeed extends BaseFeed
 
     public function getTemplateMeta($settings = array(), $postId = null)
     {
+        $this->postId = $postId;
         $feed_settings = Arr::get($settings, 'feed_settings', array());
         $apiSettings   = Arr::get($feed_settings, 'source_settings', array());
         $data = [];
