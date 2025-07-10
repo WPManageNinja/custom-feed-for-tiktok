@@ -28,7 +28,8 @@ class TiktokFeed extends BaseFeed
     private $client_key = 'aw4cddbhcvsbl34m';
     private $client_secret = 'IV2QhJ7nxhvEthCI2QqZTTPpoNZOPZB6';
     private $redirect_uri = 'https://wpsocialninja.com/api/tiktok_callback';
-
+    private $postId;
+    
     protected $errorManager;
 
     public function __construct()
@@ -368,7 +369,7 @@ class TiktokFeed extends BaseFeed
         $cache_names = [
             'user_account_header_' . $userId,
             'user_feed_id_' . $userId,
-           'specific_videos_id_' . $userId,
+            'single_video_feed_id' . $userId,
         ];
 
         foreach ($cache_names as $cache_name) {
@@ -500,17 +501,17 @@ class TiktokFeed extends BaseFeed
 
     public function getEditorSettings($args = [])
     {
-        $postId = Arr::get($args, 'postId');
+        $this->postId = Arr::get($args, 'postId');
         $tiktokConfig = new TiktokConfig();
-        $feed_meta       = get_post_meta($postId, '_wpsr_template_config', true);
-        $feed_template_style_meta = get_post_meta($postId, '_wpsr_template_styles_config', true);
+        $feed_meta       = get_post_meta($this->postId, '_wpsr_template_config', true);
+        $feed_template_style_meta = get_post_meta($this->postId, '_wpsr_template_styles_config', true);
         $decodedMeta     = json_decode($feed_meta, true);
         $feed_settings   = Arr::get($decodedMeta, 'feed_settings', array());
         $feed_settings   = TiktokConfig::formatTiktokConfig($feed_settings, array());
         $settings        = $this->getTemplateMeta($feed_settings);
-        $templateDetails = get_post($postId);
+        $templateDetails = get_post($this->postId);
         $settings['feed_type'] = Arr::get($settings, 'feed_settings.source_settings.feed_type');
-        $settings['styles_config'] = $tiktokConfig->formatStylesConfig(json_decode($feed_template_style_meta, true), $postId);
+        $settings['styles_config'] = $tiktokConfig->formatStylesConfig(json_decode($feed_template_style_meta, true), $this->postId);
 
         $global_settings = get_option('wpsr_'.$this->platform.'_global_settings');
         $advanceSettings = (new GlobalSettings())->getGlobalSettings('advance_settings');
@@ -557,6 +558,7 @@ class TiktokFeed extends BaseFeed
 
     public function editEditorSettings($settings = array(), $postId = null)
     {
+        $this->postId = $postId;
         $styles_config = Arr::get($settings, 'styles_config');
 
         $format_feed_settings = TiktokConfig::formatTiktokConfig($settings['feed_settings'], array());
@@ -702,7 +704,7 @@ class TiktokFeed extends BaseFeed
             $difference1 = array_diff($video_ids, $cached_video_ids);
             $difference2 = array_diff($cached_video_ids, $video_ids);
 
-            $accountCacheName = $feedType . '_id_' . $accountId . '_video_ids_' . count($video_ids);
+            $accountCacheName = 'single_video_feed_id_' . $accountId .'_template_'.$this->postId. '_num_' . count($video_ids);
 
             if (!empty($difference1) && !empty($difference2)) {
                 if(!empty($cached_video_ids)){
@@ -756,6 +758,7 @@ class TiktokFeed extends BaseFeed
             }
 
             $account_data = $this->makeRequest($fetchUrl, $accessToken, $body_args);
+
             do_action( 'wpsocialreviews/tiktok_feed_api_connect_response', $account_data );
 
             if(is_wp_error($account_data)) {
@@ -1052,7 +1055,7 @@ class TiktokFeed extends BaseFeed
             // Extract feed type
             if (strpos($optionName, 'user_feed_id_') !== false) {
                 $feed_type = 'user_feed';
-            } elseif (strpos($optionName, 'specific_videos_id_') !== false) {
+            } elseif (strpos($optionName, 'single_video_feed_id_') !== false) {
                 $feed_type = 'specific_videos';
             }
 
@@ -1072,15 +1075,27 @@ class TiktokFeed extends BaseFeed
                     'feed_count' => $total
                 ];
             } elseif ($feed_type === 'specific_videos') {
-                $accountIdStart = strpos($optionName, 'specific_videos_id_') + strlen('specific_videos_id_');
-                if (strpos($optionName, '_video_ids_') !== false) {
-                    $vidPosition = strpos($optionName, '_video_ids_');
+                $accountIdStart = strpos($optionName, 'single_video_feed_id_') + strlen('single_video_feed_id_');
+
+                if (strpos($optionName, '_template_') !== false) {
+                    $vidPosition = strpos($optionName, '_template_');
                     $sourceId = substr($optionName, $accountIdStart, $vidPosition - $accountIdStart);
-                    $total = substr($optionName, $vidPosition + strlen('_video_ids_'));
+                    $total = substr($optionName, $vidPosition + strlen('_template_'));
                 }
+
+                // get post ID from the option name
+                $postIdPosition = strpos($optionName, '_template_');
+                if ($postIdPosition !== false) {
+                    $templatePos = strpos($optionName, '_template_') + strlen('_template_');
+                    $numPos = strpos($optionName, '_num_');
+                    $postId = substr($optionName, $templatePos, $numPos - $templatePos); // $number will be '106'
+                    $this->postId = $postId; // Set post ID for later use
+                } else {
+                    $this->postId = '';
+                }
+
                 $specifiVideos = [];
                 $videos = Arr::get($cache, 'option_value.videos', []);
-
                 
                 foreach ($videos as $key => $value) {
                     $specifiVideos[] = Arr::get($value, 'id', '');
@@ -1098,7 +1113,6 @@ class TiktokFeed extends BaseFeed
             if (!empty($sourceId) && isset($connectedSources[$sourceId])) {
                 $account = $connectedSources[$sourceId];
                 $this->maybeRefreshToken($account);
-                
                 $this->getAccountFeed($account, $apiSettings, true);
                 
                 // Update header details
