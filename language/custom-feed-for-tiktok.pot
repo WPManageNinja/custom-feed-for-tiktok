@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Custom Feed for TikTok\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-11 10:10+0000\n"
+"POT-Creation-Date: 2025-07-11 10:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -102,7 +102,7 @@ msgstr ""
 msgid "Box Background Color"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:1010
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:1114
 msgid "Cache cleared successfully!"
 msgstr ""
 
@@ -277,7 +277,11 @@ msgstr ""
 msgid "Pagination"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:339
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:726
+msgid "Please enter at least one video id"
+msgstr ""
+
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:406
 msgid "Please select an Account to get feeds."
 msgstr ""
 
@@ -328,7 +332,7 @@ msgstr ""
 msgid "Social Ninja TikTok Feed"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:933
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:1003
 msgid "Something went wrong"
 msgstr ""
 
@@ -356,15 +360,15 @@ msgstr ""
 msgid "Style"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:460
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:527
 msgid "Success"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:314
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:380
 msgid "Successfully Disconnected!"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:489
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:556
 msgid "Template Saved Successfully!!"
 msgstr ""
 
@@ -393,7 +397,7 @@ msgid "Text Color:"
 msgstr ""
 
 #. %s: Account ID linked to the configuration
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:545
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:613
 #, php-format
 msgid ""
 "The account ID (%s) linked to your configuration has been deleted. To "
@@ -402,12 +406,12 @@ msgid ""
 "navigate to Source → Select Account, and choose the account again."
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:547
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:615
 msgid "There are multiple accounts being used on this template. "
 msgstr ""
 
 #. %s: Account username or display name
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:361
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:428
 #, php-format
 msgid ""
 "There has been a problem with your account (%s). Please reconnect your "
@@ -415,7 +419,7 @@ msgid ""
 msgstr ""
 
 #. %s: Account username or display name
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:366
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:433
 #, php-format
 msgid ""
 "There has been a problem with your account (%s). The user has not authorized "
@@ -423,7 +427,7 @@ msgid ""
 msgstr ""
 
 #. %s: Account username or display name
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:371
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:438
 #, php-format
 msgid ""
 "There has been a problem with your account(%s). Your access token is invalid "
@@ -432,7 +436,7 @@ msgid ""
 msgstr ""
 
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:16
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:49
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:50
 msgid "TikTok"
 msgstr ""
 
@@ -440,7 +444,7 @@ msgstr ""
 msgid "TikTok Feeds"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:430
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:497
 msgid ""
 "TikTok feeds are not being displayed due to the \"optimize images\" option "
 "being disabled. If the GDPR settings are set to \"Yes,\" it is necessary to "
@@ -478,7 +482,7 @@ msgstr ""
 msgid "WP Social Ninja"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:62
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:63
 msgid "You are Successfully Verified."
 msgstr ""
 

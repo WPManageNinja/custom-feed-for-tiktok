@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 !defined('WPINC') && die;
 
-define('CUSTOM_FEED_FOR_TIKTOK_VERSION', '1.1.5');
+define('CUSTOM_FEED_FOR_TIKTOK_VERSION', '1.1.6');
 define('CUSTOM_FEED_FOR_TIKTOK', true);
 define('CUSTOM_FEED_FOR_TIKTOK_URL', plugin_dir_url(__FILE__));
 define('CUSTOM_FEED_FOR_TIKTOK_DIR', plugin_dir_path(__FILE__));

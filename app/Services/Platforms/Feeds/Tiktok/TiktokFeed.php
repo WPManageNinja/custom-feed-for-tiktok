@@ -687,18 +687,18 @@ class TiktokFeed extends BaseFeed
             $pages++;
         }
 
+
+        $accountCacheName = '';
         if ($feedType === 'user_feed') {
             $accountCacheName  = $feedType.'_id_'.$accountId.'_num_'.$totalFeed;
-        }
-        else if ($feedType === 'single_video_feed') {
+        } else if ($feedType === 'single_video_feed') {
             $apiSpecificVideos = Arr::get($apiSettings, 'single_video_feed_ids', '');
-            
             $video_ids = array_map('trim', explode(',', $apiSpecificVideos));
-
             $accountCacheName = 'single_video_feed_id_' . $accountId .'_template_'.$this->postId. '_num_' . count($video_ids);
         }
+
         $feeds = [];
-        if(!$cache) {
+        if(!$cache && $accountCacheName) {
             $feeds = $this->cacheHandler->getFeedCache($accountCacheName);
         }
         $fetchUrl = '';
@@ -716,8 +716,7 @@ class TiktokFeed extends BaseFeed
                 $body_args = [
                     'max_count' => $perPage
                 ];
-            }
-            elseif ($feedType === 'single_video_feed') {
+            } elseif ($feedType === 'single_video_feed') {
                 $fields = apply_filters('custom_feed_for_tiktok/tiktok_specific_video_api_details', '');
                 $fetchUrl = $this->remoteFetchUrl . $fields;
 
