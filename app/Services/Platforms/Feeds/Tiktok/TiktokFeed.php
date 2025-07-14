@@ -28,7 +28,7 @@ class TiktokFeed extends BaseFeed
     private $client_key = 'aw4cddbhcvsbl34m';
     private $client_secret = 'IV2QhJ7nxhvEthCI2QqZTTPpoNZOPZB6';
     private $redirect_uri = 'https://wpsocialninja.com/api/tiktok_callback';
-    private $postId;
+    private $postId = null;
     
     protected $errorManager;
 
@@ -502,17 +502,18 @@ class TiktokFeed extends BaseFeed
 
     public function getEditorSettings($args = [])
     {
-        $this->postId = Arr::get($args, 'postId');
+        $postId = Arr::get($args, 'postId');
+        $this->postId = $postId;
         $tiktokConfig = new TiktokConfig();
-        $feed_meta       = get_post_meta($this->postId, '_wpsr_template_config', true);
-        $feed_template_style_meta = get_post_meta($this->postId, '_wpsr_template_styles_config', true);
+        $feed_meta       = get_post_meta($postId, '_wpsr_template_config', true);
+        $feed_template_style_meta = get_post_meta($postId, '_wpsr_template_styles_config', true);
         $decodedMeta     = json_decode($feed_meta, true);
         $feed_settings   = Arr::get($decodedMeta, 'feed_settings', array());
         $feed_settings   = TiktokConfig::formatTiktokConfig($feed_settings, array());
         $settings        = $this->getTemplateMeta($feed_settings);
-        $templateDetails = get_post($this->postId);
+        $templateDetails = get_post($postId);
         $settings['feed_type'] = Arr::get($settings, 'feed_settings.source_settings.feed_type');
-        $settings['styles_config'] = $tiktokConfig->formatStylesConfig(json_decode($feed_template_style_meta, true), $this->postId);
+        $settings['styles_config'] = $tiktokConfig->formatStylesConfig(json_decode($feed_template_style_meta, true), $postId);
 
         $global_settings = get_option('wpsr_'.$this->platform.'_global_settings');
         $advanceSettings = (new GlobalSettings())->getGlobalSettings('advance_settings');
@@ -1070,7 +1071,7 @@ class TiktokFeed extends BaseFeed
                     $postId = substr($optionName, $templatePos, $numPos - $templatePos); // $number will be '106'
                     $this->postId = $postId; // Set post ID for later use
                 } else {
-                    $this->postId = '';
+                    $this->postId = null;
                 }
 
                 $specificVideos = [];
