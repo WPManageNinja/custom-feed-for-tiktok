@@ -510,8 +510,10 @@ class TiktokFeed extends BaseFeed
         $decodedMeta     = json_decode($feed_meta, true);
         $feed_settings   = Arr::get($decodedMeta, 'feed_settings', array());
         $feed_settings   = TiktokConfig::formatTiktokConfig($feed_settings, array());
-        $settings        = $this->getTemplateMeta($feed_settings);
-        $templateDetails = get_post($postId);
+
+        $settings        = $this->getTemplateMeta($feed_settings, $postId);
+        $templateDetails = get_post($this->postId);
+
         $settings['feed_type'] = Arr::get($settings, 'feed_settings.source_settings.feed_type');
         $settings['styles_config'] = $tiktokConfig->formatStylesConfig(json_decode($feed_template_style_meta, true), $postId);
 
@@ -564,7 +566,7 @@ class TiktokFeed extends BaseFeed
         $styles_config = Arr::get($settings, 'styles_config');
 
         $format_feed_settings = TiktokConfig::formatTiktokConfig($settings['feed_settings'], array());
-        $settings             = $this->getTemplateMeta($format_feed_settings);
+        $settings             = $this->getTemplateMeta($format_feed_settings, $postId);
         $settings['feed_type'] = Arr::get($settings, 'feed_settings.source_settings.feed_type');
 
         $settings['styles_config'] = $styles_config;
