@@ -180,7 +180,6 @@ class TiktokFeed extends BaseFeed
 
     public function maybeRefreshToken($account)
     {
-        $accessToken    = Arr::get($account, 'access_token');
         $accessToken = Arr::get($account, 'access_token');
         $userId = Arr::get($account, 'open_id');
         $configs = get_option('wpsr_tiktok_connected_sources_config', []);
