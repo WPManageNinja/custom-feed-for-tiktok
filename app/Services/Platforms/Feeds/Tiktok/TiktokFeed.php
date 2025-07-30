@@ -181,51 +181,40 @@ class TiktokFeed extends BaseFeed
     public function maybeRefreshToken($account)
     {
         $accessToken    = Arr::get($account, 'access_token');
-        $userId         = Arr::get($account, 'open_id');
-        $configs        = get_option('wpsr_tiktok_connected_sources_config', []);
-        $sourceList     = Arr::get($configs, 'sources') ? $configs['sources'] : [];
+        $accessToken = Arr::get($account, 'access_token');
+        $userId = Arr::get($account, 'open_id');
+        $configs = get_option('wpsr_tiktok_connected_sources_config', []);
+        $sourceList = Arr::get($configs, 'sources', []);
 
-        if (array_key_exists($userId, $sourceList)) {
-            $existingData = $sourceList[$userId];
-            $expirationTime = Arr::get($existingData, 'expiration_time', 0);
-            $current_time = current_time('timestamp', true);
-            $refreshToken = Arr::get($existingData, 'refresh_token', '');
-
-            // Check if token is actually expired (not just close to expiring)
-            if ($expirationTime < $current_time) {
-                // Token is expired, try to refresh
-                $refreshResult = $this->refreshAccessToken($refreshToken, $userId);
-
-                // Check if refresh was successful
-                if ($refreshResult && !is_array($refreshResult)) {
-                    // Refresh successful, use new token
-                    $accessToken = $refreshResult;
-                } else {
-                    // Refresh failed, but try to use existing token anyway (might still work for a while)
-                    if (is_array($refreshResult) && isset($refreshResult['error_message'])) {
-                        error_log('TikTok refresh error: ' . $refreshResult['error_message']);
-                    }
-                    // Decrypt and try existing token
-                    $accessToken = $this->protector->decrypt($accessToken);
-
-                    // Only fail if we have no token at all
-                    if (empty($accessToken)) {
-                        $this->clearExpiredToken($userId);
-                        return false;
-                    }
-                }
-            } else {
-                // Token not expired, decrypt and return existing token
-                $accessToken = $this->protector->decrypt($accessToken);
-            }
-        } else {
-            // Decrypt the access token if it exists
-            if ($accessToken) {
-                $accessToken = $this->protector->decrypt($accessToken);
-            }
+        if (!array_key_exists($userId, $sourceList)) {
+            return $this->protector->decrypt($accessToken) ?: $accessToken;
         }
 
-        return $accessToken;
+        $existingData = $sourceList[$userId];
+
+        // Check if we should refresh the token
+        if ($this->shouldRefreshToken($existingData)) {
+            $refreshToken = Arr::get($existingData, 'refresh_token', '');
+            if (empty($refreshToken)) {
+                return ['error_message' => 'No refresh token available'];
+            }
+
+            $refreshResult = $this->refreshAccessToken($refreshToken, $userId);
+
+            // Handle refresh errors
+            if (is_array($refreshResult) && isset($refreshResult['error_message'])) {
+                return $refreshResult;
+            }
+
+            // Return refreshed token if successful
+            if ($refreshResult && !is_array($refreshResult)) {
+                return $refreshResult;
+            }
+
+            return ['error_message' => 'Token refresh failed'];
+        }
+
+        return $this->protector->decrypt($accessToken) ?: $accessToken;
     }
 
     public function refreshAccessToken($refreshTokenReceived, $userId)
@@ -256,55 +245,37 @@ class TiktokFeed extends BaseFeed
 
         $response = wp_remote_post($api_url, $args);
 
-        // Check for HTTP errors
         if (is_wp_error($response)) {
-            error_log('TikTok token refresh HTTP error: ' . $response->get_error_message());
-            return false;
+            return ['error_message' => $response->get_error_message()];
         }
 
-        $responseCode = wp_remote_retrieve_response_code($response);
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
 
-        if ($responseCode !== 200) {
-            error_log('TikTok token refresh failed with status code: ' . $responseCode);
-            return false;
-        }
-
         if (isset($data['error_description'])) {
-            $errorMessage = $data['error_description'];
-            $errorCode = Arr::get($data, 'error');
-
-            error_log('TikTok token refresh API error: ' . $errorMessage);
-
-            $data = [
-                'error_message'  => $errorMessage,
-                'error_code'     => $errorCode,
+            $errorData = [
+                'error_message' => $data['error_description'],
+                'error_code' => Arr::get($data, 'error'),
             ];
-            $this->updateSourceList($userId, $data);
-            return $data;
+            $this->updateSourceList($userId, $errorData);
+            return $errorData;
         }
 
-        if (isset($data['open_id']) && isset($data['access_token'])) {
-            $access_token = $data['access_token'];
-            $refresh_token = $data['refresh_token'];
-            $expires_in = intval($data['expires_in']);
-            $expiration_time = time() + $expires_in;
-            $open_id = $data['open_id'];
-            $accountDetails = $this->getAccountDetails($open_id);
-
-            $data = [
-                'access_token' => $this->protector->encrypt($access_token),
-                'refresh_token' => $refresh_token,
-                'expiration_time' => $expiration_time,
-                'open_id' => $open_id,
+        if (isset($data['access_token']) && isset($data['open_id'])) {
+            $updateData = [
+                'access_token' => $this->protector->encrypt($data['access_token']),
+                'refresh_token' => $data['refresh_token'],
+                'expiration_time' => time() + intval($data['expires_in']),
+                'open_id' => $data['open_id'],
+                'error_message' => '', // Clear previous errors
+                'error_code' => '',
             ];
 
-            $this->updateSourceList($userId, $data);
-            return $access_token;
-        } else {
-            return false;
+            $this->updateSourceList($userId, $updateData);
+            return $data['access_token'];
         }
+
+        return ['error_message' => 'Invalid refresh response'];
     }
 
     private function updateSourceList($userId, $data)
@@ -314,25 +285,6 @@ class TiktokFeed extends BaseFeed
         $mergedData = array_merge($existingData, $data);
         $sourceList[$userId] = $mergedData;
         update_option('wpsr_tiktok_connected_sources_config', ['sources' => $sourceList]);
-    }
-
-    /**
-     * Clear expired token data when refresh fails
-     */
-    private function clearExpiredToken($userId)
-    {
-        $sourceList = $this->getConnectedSourceList();
-        if (isset($sourceList[$userId])) {
-            // Mark token as expired and requiring re-authentication
-            $sourceList[$userId]['access_token'] = '';
-            $sourceList[$userId]['refresh_token'] = '';
-            $sourceList[$userId]['expiration_time'] = 0;
-            $sourceList[$userId]['token_expired'] = true;
-            $sourceList[$userId]['last_error'] = 'Token refresh failed - re-authentication required';
-            $sourceList[$userId]['last_error_time'] = time();
-
-            update_option('wpsr_tiktok_connected_sources_config', ['sources' => $sourceList]);
-        }
     }
 
     public function getVerificationConfigs()
@@ -408,9 +360,10 @@ class TiktokFeed extends BaseFeed
 
         $account = Arr::get($feed_settings, 'header_settings.account_to_show');
         if(!empty($account)) {
-            $accountDetails = $this->getAccountDetails($account);
             $connectedSources = $this->getConnectedSourceList();
             $connectedAccount = Arr::get($connectedSources, $account);
+            $accessToken = $this->protector->decrypt($connectedAccount['access_token']) ?: $connectedAccount['access_token'];
+            $accountDetails = $this->getAccountDetails($account, $accessToken);
             $has_account_error_code = Arr::get($connectedAccount, 'error_code');
 
             if(isset($accountDetails['error_message'])) {
@@ -496,6 +449,12 @@ class TiktokFeed extends BaseFeed
             $settings['dynamic']['header'] = [];
             $settings['dynamic']['error_message']['error_message'] = __('TikTok feeds are not being displayed due to the "optimize images" option being disabled. If the GDPR settings are set to "Yes," it is necessary to enable the optimize images option.', 'custom-feed-for-tiktok');
         }
+
+//        $isActive = get_option('wpsr_'.$this->platform.'_connected_sources_config');
+//        if ( class_exists('\WPSocialReviews\App\Services\Onboarding\OnboardingHelper') && Arr::get($settings, 'feed_settings.created_from_onboarding') && !$isActive) {
+//            $onboardingHelper = new \WPSocialReviews\App\Services\Onboarding\OnboardingHelper();
+//            $onboardingHelper::applyOnboardingSettings($postId, 'tiktok', $settings);
+//        }
 
         return $settings;
     }
@@ -650,26 +609,20 @@ class TiktokFeed extends BaseFeed
 
     public function getAccountFeed($account, $apiSettings, $cache = false)
     {
-        $accessToken    = $this->protector->decrypt($account['access_token']) ? $this->protector->decrypt($account['access_token']) : $account['access_token'];
-        $accountId         = Arr::get($account, 'open_id');
-        $account = [
+        $accessToken = $this->protector->decrypt($account['access_token']) ?: $account['access_token'];
+        $accountId = Arr::get($account, 'open_id');
+
+        $tokenResult = $this->maybeRefreshToken([
             'access_token' => $accessToken,
             'open_id' => $accountId
-        ];
-        $access_token = $this->maybeRefreshToken($account);
+        ]);
 
-        // Check if token refresh failed completely
-        if ($access_token === false) {
-            // Try to use the original token as fallback
-            $access_token = $accessToken;
+        // Handle token refresh errors
+        if (is_array($tokenResult) && isset($tokenResult['error_message'])) {
+            return ['error' => $tokenResult];
         }
 
-        if(isset($access_token['error_message'])){
-            return [
-                'error' => $access_token
-            ];
-        }
-        $accessToken = $access_token;
+        $accessToken = $tokenResult;
         $feedType       = Arr::get($apiSettings, 'feed_type', 'user_feed');
 
         $totalFeed      = Arr::get($apiSettings, 'feed_count');
@@ -799,7 +752,7 @@ class TiktokFeed extends BaseFeed
 
                     if (isset($account_feeds['data']['videos'])) {
                         foreach ($account_feeds['data']['videos'] as &$feed) {
-                            $accountDetails = $this->getAccountDetails($accountId);
+                            $accountDetails = $this->getAccountDetails($accountId, $accessToken);
                             $feed['from']['avatar_url'] = Arr::get($accountDetails, 'data.user.avatar_url', '');
                             $feed['from']['display_name'] = Arr::get($accountDetails, 'data.user.display_name', '');
                             $feed['from']['profile_url'] = Arr::get($accountDetails, 'data.user.profile_deep_link', '');
@@ -810,6 +763,13 @@ class TiktokFeed extends BaseFeed
                     $dataFormatted = $this->formatData($account_feeds['data']);
                     $account_feeds['data'] = $dataFormatted;
                     $this->cacheHandler->createCache($accountCacheName, $dataFormatted);
+
+                    $connectedSources = $this->getConnectedSourceList();
+                    $errorMessage = Arr::get($connectedSources, $accountId.'.error_message', '');
+
+                    if(!empty($errorMessage)){
+                        $this->updateConnectedSourcesStatus($connectedSources, $accountId);
+                    }
                 }
                 $feeds = Arr::get($account_feeds, 'data', []);
             }
@@ -822,6 +782,24 @@ class TiktokFeed extends BaseFeed
         return $feeds;
     }
 
+    public function updateConnectedSourcesStatus($connectedSources, $id)
+    {
+        if(is_array($connectedSources) && !empty($connectedSources[$id])){
+            $connectedSources[$id]['error_message'] = '';
+            $connectedSources[$id]['error_code'] = null;
+            $connectedSources[$id]['status'] = '';
+            $connectedSources[$id]['has_critical_error'] = false;
+            $connectedSources[$id]['has_app_permission_error'] = false;
+            update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
+
+            // Also clear from error manager
+            $accountArgs = [
+                'user_id' => $id,
+                'username' => $id,
+            ];
+            $this->errorManager->removeErrors('connection', $accountArgs);
+        }
+    }
 
     public function makeRequest($url, $accessToken, $bodyArgs)
     {
@@ -915,33 +893,37 @@ class TiktokFeed extends BaseFeed
         return $allData;
     }
 
-    public function getAccountDetails($account)
+    public function getAccountDetails($account, $accessToken)
     {
         $connectedAccounts = $this->getConnectedSourceList();
         $accountDetails = [];
         if (isset($connectedAccounts[$account])) {
             $accountInfo = $connectedAccounts[$account];
-            $accountDetails  = $this->getHeaderDetails($accountInfo, false);
+            $accountDetails  = $this->getHeaderDetails($accountInfo, false, $accessToken);
         }
         return $accountDetails;
     }
 
-    public function getHeaderDetails($account, $cacheFetch = false)
+    public function getHeaderDetails($account, $cacheFetch = false, $accessToken = '')
     {
-        $accountId         = Arr::get($account, 'open_id');
-        $accessToken    = $this->protector->decrypt($account['access_token']) ? $this->protector->decrypt($account['access_token']) : $account['access_token'];
+        $accountId = Arr::get($account, 'open_id');
+        if($cacheFetch){
+            $accessToken = $this->protector->decrypt($account['access_token']) ?: $account['access_token'];
 
-        // Try to refresh token if needed
-        $refreshedToken = $this->maybeRefreshToken([
-            'access_token' => $accessToken,
-            'open_id' => $accountId
-        ]);
+            // Try to refresh token if needed
+            $tokenResult = $this->maybeRefreshToken([
+                'access_token' => $accessToken,
+                'open_id' => $accountId
+            ]);
 
-        // Use refreshed token if available, otherwise use original
-        if ($refreshedToken !== false) {
-            $accessToken = $refreshedToken;
+            // Handle token refresh errors
+            if (is_array($tokenResult) && isset($tokenResult['error_message'])) {
+                return ['error' => $tokenResult];
+            }
+
+            $accessToken = $tokenResult;
         }
-        // If refresh failed, we'll still try with the original token
+
         $accountCacheName = 'user_account_header_'.$accountId;
 
         $accountData = [];
@@ -951,7 +933,7 @@ class TiktokFeed extends BaseFeed
 
         if(empty($accountData) || $cacheFetch) {
             $fetchUrl = $this->remoteFetchUrl . 'user/info/?fields=open_id,union_id,avatar_url,profile_deep_link,display_name,bio_description,is_verified,follower_count,following_count,likes_count,video_count';
-            $args     = array(
+            $args = array(
                 'headers' => [
                     'Authorization' => "Bearer ". $accessToken,
                     'Content-Type' => 'application/json'
@@ -962,7 +944,10 @@ class TiktokFeed extends BaseFeed
             do_action( 'wpsocialreviews/tiktok_feed_api_connect_response', $accountData);
 
             if(is_wp_error($accountData)) {
-                return ['error_message' => $accountData->get_error_message()];
+                $errors = [
+                    'error_message' => $accountData->get_error_message()
+                ];
+                return ['error' => $errors];
             }
 
             if(Arr::get($accountData, 'error.code') && (new PlatformData('tiktok'))->isAppPermissionError($accountData)){
@@ -970,16 +955,17 @@ class TiktokFeed extends BaseFeed
             }
 
             if(Arr::get($accountData, 'response.code') !== 200) {
-//                $errorMessage = $this->getErrorMessage($accountData);
-//                return ['error_message' => $errorMessage];
                 $errorCode = Arr::get($accountData, 'response.code');
+                $errorMessage = $this->getErrorMessage($accountData);
                 $accountData = json_decode(wp_remote_retrieve_body($accountData), true);
                 $accountData['error']['code'] = $errorCode;
+                $accountData['error']['error_message'] = $errorMessage;
             }
 
             if(Arr::get($accountData, 'response.code') === 200) {
                 $accountData = json_decode(wp_remote_retrieve_body($accountData), true);
-
+                $connectedSources = $this->getConnectedSourceList();
+                $this->updateConnectedSourcesStatus($connectedSources, $accountId);
                 $this->cacheHandler->createCache($accountCacheName, $accountData);
             }
         }
@@ -1090,16 +1076,22 @@ class TiktokFeed extends BaseFeed
                     'single_video_feed_ids' => $specificVideos
                 ];
             }
-            
+
             $connectedSources = $this->getConnectedSourceList();
             if (!empty($sourceId) && isset($connectedSources[$sourceId])) {
                 $account = $connectedSources[$sourceId];
-                $this->maybeRefreshToken($account);
-                $this->getAccountFeed($account, $apiSettings, true);
-                
+                $accountFeed = $this->getAccountFeed($account, $apiSettings, true);
+                $hasFeedApiError = Arr::get($accountFeed, 'error.message', '');
+                if ($hasFeedApiError) {
+                    $account['username'] = Arr::get($accountFeed, 'data.user.display_name', '');
+                    $connectedSources = $this->addPlatformApiErrors($accountFeed, $connectedSources, $account);
+                    update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
+                }
+
                 // Update header details
                 $page_header_response = $this->getHeaderDetails($account, true);
                 $hasApiError = Arr::get($page_header_response, 'error.message', '');
+
                 if ($hasApiError) {
                     $account['username'] = Arr::get($page_header_response, 'data.user.display_name', '');
                     $connectedSources = $this->addPlatformApiErrors($page_header_response, $connectedSources, $account);
@@ -1148,5 +1140,14 @@ class TiktokFeed extends BaseFeed
             return;
         }
         $this->platfromData->sendScheduleEmailReport();
+    }
+
+    private function shouldRefreshToken($account)
+    {
+        $expirationTime = Arr::get($account, 'expiration_time', 0);
+        $current_time = current_time('timestamp', true);
+        $refreshBuffer = 300; // 5 minutes before expiry
+
+        return ($expirationTime - $refreshBuffer) < $current_time;
     }
 }
