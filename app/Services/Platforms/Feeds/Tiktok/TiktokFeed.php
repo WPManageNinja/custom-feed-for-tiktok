@@ -12,6 +12,7 @@ use WPSocialReviews\App\Services\Platforms\Feeds\Common\FeedFilters;
 use WPSocialReviews\App\Services\Platforms\ImageOptimizationHandler;
 use WPSocialReviews\App\Services\Platforms\PlatformData;
 use WPSocialReviews\Framework\Support\Arr;
+use WPSocialReviews\App\Services\Helper;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
@@ -161,6 +162,7 @@ class TiktokFeed extends BaseFeed
                     'error_code'     => '',
                     'has_app_permission_error'     => false,
                     'has_critical_error'     => false,
+                    'encryption_error'     => false,
                 ];
 
                 $sourceList = $this->getConnectedSourceList();
@@ -169,6 +171,8 @@ class TiktokFeed extends BaseFeed
                     'user_id' => $open_id,
                     'username' => $open_id,
                 ];
+
+                $this->clearFeedCache($open_id);
                 $this->errorManager->removeErrors('connection', $accountArgs);
                 update_option('wpsr_tiktok_connected_sources_config', array('sources' => $sourceList));
 
@@ -202,7 +206,7 @@ class TiktokFeed extends BaseFeed
 
             // Handle refresh errors
             if (is_array($refreshResult) && isset($refreshResult['error_message'])) {
-                return $refreshResult;
+                return $this->protector->decrypt($accessToken) ?: $accessToken;
             }
 
             // Return refreshed token if successful
@@ -314,7 +318,24 @@ class TiktokFeed extends BaseFeed
             delete_option('wpsr_tiktok_connected_sources_config');
             delete_option('wpsr_tiktok_local_avatars');
             delete_option('wpsr_tiktok_revoke_platform_data');
-//            delete_option('wpsr_tiktok_global_settings');
+        }
+
+        $this->clearFeedCache($userId);
+
+        wp_send_json_success([
+            'message' => __('Successfully Disconnected!', 'custom-feed-for-tiktok'),
+        ], 200);
+    }
+
+    /**
+     * Clear multiple cache entries related to a user's feed and account.
+     *
+     * @param string|int|null $userId User ID associated with the cache.
+     */
+    private function clearFeedCache($userId)
+    {
+        if (is_null($userId)) {
+            return; // avoid clearing global keys if userId is missing
         }
 
         $cache_names = [
@@ -326,10 +347,6 @@ class TiktokFeed extends BaseFeed
         foreach ($cache_names as $cache_name) {
             $this->cacheHandler->clearCacheByName($cache_name);
         }
-
-        wp_send_json_success([
-            'message' => __('Successfully Disconnected!', 'custom-feed-for-tiktok'),
-        ], 200);
     }
 
     public function getConnectedSourceList()
@@ -375,6 +392,12 @@ class TiktokFeed extends BaseFeed
                 $errorMessage = Arr::get($connectedAccount, 'error_message');
                 $userName = Arr::get($connectedAccount, 'display_name');
 
+                if($this->hasEncryptionError($accessToken) && method_exists(Helper::class, 'getEncryptionErrorData')){
+                    $encryptionError = Helper::getEncryptionErrorData();
+                    $errorMessage = Arr::get($encryptionError, 'message');
+                    $has_account_error_code = Arr::get($encryptionError, 'code');
+                }
+
                 if (empty($errorMessage)) {
                     // translators: %s: Account username or display name
                     $errorMessage = sprintf(__('There has been a problem with your account (%s). Please reconnect your account.', 'custom-feed-for-tiktok'), $userName);
@@ -389,6 +412,7 @@ class TiktokFeed extends BaseFeed
                     // translators: %s: Account username or display name
                     $errorMessage =  sprintf(__('There has been a problem with your account(%s). Your access token is invalid has expired. Please reconnect your account. Otherwise, the feed will no longer work.', 'custom-feed-for-tiktok'), $userName);
                 }
+
                 $errorData = [
                     'error_message' => $errorMessage,
                     'error_code' => $has_account_error_code,
@@ -616,11 +640,6 @@ class TiktokFeed extends BaseFeed
             'open_id' => $accountId
         ]);
 
-        // Handle token refresh errors
-        if (is_array($tokenResult) && isset($tokenResult['error_message'])) {
-            return ['error' => $tokenResult];
-        }
-
         $accessToken = $tokenResult;
         $feedType       = Arr::get($apiSettings, 'feed_type', 'user_feed');
 
@@ -789,6 +808,7 @@ class TiktokFeed extends BaseFeed
             $connectedSources[$id]['status'] = '';
             $connectedSources[$id]['has_critical_error'] = false;
             $connectedSources[$id]['has_app_permission_error'] = false;
+            $connectedSources[$id]['encryption_error'] = false;
             update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
 
             // Also clear from error manager
@@ -906,7 +926,8 @@ class TiktokFeed extends BaseFeed
     public function getHeaderDetails($account, $cacheFetch = false, $accessToken = '')
     {
         $accountId = Arr::get($account, 'open_id');
-        if($cacheFetch){
+
+        if($cacheFetch & empty($accessToken)){
             $accessToken = $this->protector->decrypt($account['access_token']) ?: $account['access_token'];
 
             // Try to refresh token if needed
@@ -914,11 +935,6 @@ class TiktokFeed extends BaseFeed
                 'access_token' => $accessToken,
                 'open_id' => $accountId
             ]);
-
-            // Handle token refresh errors
-            if (is_array($tokenResult) && isset($tokenResult['error_message'])) {
-                return ['error' => $tokenResult];
-            }
 
             $accessToken = $tokenResult;
         }
@@ -1015,31 +1031,20 @@ class TiktokFeed extends BaseFeed
             $optionName = $cache['option_name'];
             $feed_type = '';
             $sourceId = '';
+            $specificVideos = [];
             $total = 0;
-            
-            // Extract feed type
+
+            // Extract feed type and source ID
             if (strpos($optionName, 'user_feed_id_') !== false) {
                 $feed_type = 'user_feed';
-            } elseif (strpos($optionName, 'single_video_feed_id_') !== false) {
-                $feed_type = 'single_video_feed';
-            }
-
-            $apiSettings = [];
-            
-            // Extract source ID based on feed type
-            if ($feed_type === 'user_feed') {
                 $accountIdStart = strpos($optionName, 'user_feed_id_') + strlen('user_feed_id_');
                 if (strpos($optionName, '_num_') !== false) {
                     $numPosition = strpos($optionName, '_num_');
                     $sourceId = substr($optionName, $accountIdStart, $numPosition - $accountIdStart);
                     $total = substr($optionName, $numPosition + strlen('_num_'));
                 }
-
-                $apiSettings = [
-                    'feed_type' => $feed_type,
-                    'feed_count' => $total
-                ];
-            } elseif ($feed_type === 'single_video_feed') {
+            } elseif (strpos($optionName, 'single_video_feed_id_') !== false) {
+                $feed_type = 'single_video_feed';
                 $accountIdStart = strpos($optionName, 'single_video_feed_id_') + strlen('single_video_feed_id_');
 
                 if (strpos($optionName, '_template_') !== false) {
@@ -1055,13 +1060,12 @@ class TiktokFeed extends BaseFeed
                 if ($postIdPosition !== false) {
                     $templatePos = strpos($optionName, '_template_') + strlen('_template_');
                     $numPos = strpos($optionName, '_num_');
-                    $postId = substr($optionName, $templatePos, $numPos - $templatePos); // $number will be '106'
+                    $postId = substr($optionName, $templatePos, $numPos - $templatePos);
                     $this->postId = $postId; // Set post ID for later use
                 } else {
                     $this->postId = null;
                 }
 
-                $specificVideos = [];
                 $videos = Arr::get($cache, 'option_value.videos', []);
                 
                 foreach ($videos as $key => $value) {
@@ -1069,6 +1073,19 @@ class TiktokFeed extends BaseFeed
                 }
                 $specificVideos = implode(',', $specificVideos);
 
+            } elseif (strpos($optionName, 'user_account_header_') !== false) {
+                $feed_type = 'header';
+                $sourceId = substr($optionName, strlen('user_account_header_'));
+            }
+
+            $apiSettings = [];
+
+            if ($feed_type === 'user_feed') {
+                $apiSettings = [
+                    'feed_type' => $feed_type,
+                    'feed_count' => $total
+                ];
+            } elseif ($feed_type === 'single_video_feed') {
                 $apiSettings = [
                     'feed_type' => $feed_type,
                     'feed_count' => $total,
@@ -1079,24 +1096,30 @@ class TiktokFeed extends BaseFeed
             $connectedSources = $this->getConnectedSourceList();
             if (!empty($sourceId) && isset($connectedSources[$sourceId])) {
                 $account = $connectedSources[$sourceId];
-                $accountFeed = $this->getAccountFeed($account, $apiSettings, true);
-                $hasFeedApiError = Arr::get($accountFeed, 'error.message', '');
-                if ($hasFeedApiError) {
-                    $account['username'] = Arr::get($accountFeed, 'data.user.display_name', '');
-                    $connectedSources = $this->addPlatformApiErrors($accountFeed, $connectedSources, $account);
-                    update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
-                }
+                if ($feed_type === 'header') {
+                    // For header cache, only update header details
+                    $page_header_response = $this->getHeaderDetails($account, true);
+                    $this->handleApiError($page_header_response, $connectedSources, $account);
+                } else {
+                    // For feed caches, update both feed and header
+                    $accountFeed = $this->getAccountFeed($account, $apiSettings, true);
+                    $this->handleApiError($accountFeed, $connectedSources, $account);
 
-                // Update header details
-                $page_header_response = $this->getHeaderDetails($account, true);
-                $hasApiError = Arr::get($page_header_response, 'error.message', '');
-
-                if ($hasApiError) {
-                    $account['username'] = Arr::get($page_header_response, 'data.user.display_name', '');
-                    $connectedSources = $this->addPlatformApiErrors($page_header_response, $connectedSources, $account);
-                    update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
+                    // Update header details
+                    $page_header_response = $this->getHeaderDetails($account, true);
+                    $this->handleApiError($page_header_response, $connectedSources, $account);
                 }
             }
+        }
+    }
+
+    private function handleApiError($response, &$connectedSources, $account)
+    {
+        $hasApiError = Arr::get($response, 'error.message', '');
+        if ($hasApiError) {
+            $account['username'] = Arr::get($response, 'data.user.display_name', '');
+            $connectedSources = $this->addPlatformApiErrors($response, $connectedSources, $account);
+            update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
         }
     }
 
@@ -1109,6 +1132,14 @@ class TiktokFeed extends BaseFeed
         ], 200);
     }
 
+    private function hasEncryptionError($accessToken)
+    {
+        if($accessToken){
+            return strpos($accessToken, 'act') === false && !$this->protector->decrypt($accessToken);
+        }
+        return false;
+    }
+
     public function addPlatformApiErrors($response, $connectedAccounts, $accountDetails)
     {
         $critical_codes = array(
@@ -1117,19 +1148,36 @@ class TiktokFeed extends BaseFeed
 
         $responseErrorCode = Arr::get($response, 'error.code', '');
         $userId   =  Arr::get($accountDetails, 'open_id', '');
+        $userName   =  Arr::get($accountDetails, 'display_name', '');
+        $accessToken   =  Arr::get($accountDetails, 'access_token', '');
 
-        if(!empty($responseErrorCode)){
+        if(!empty($responseErrorCode) && !$this->hasEncryptionError($accessToken)){
+            if($responseErrorCode === 401){
+                // translators: %s: Account username or display name
+                $response['error']['message'] = sprintf(__('There has been a problem with your account (%s). The user has not authorized application or revoked permission. Please reconnect your account.', 'custom-feed-for-tiktok'), $userName);
+            }
+
             $connectedAccounts[$userId]['error_message'] = Arr::get($response, 'error.message', '');
             $connectedAccounts[$userId]['error_code'] = $responseErrorCode;
             $connectedAccounts[$userId]['has_critical_error'] = in_array( $responseErrorCode, $critical_codes, true );
             $connectedAccounts[$userId]['has_app_permission_error'] = $this->platfromData->isAppPermissionError($response);
         }
         $connectedAccounts[$userId]['status'] = 'error';
-        ;
+
         $accountDetails['user_id'] = $userId;
         $accountDetails['username'] = $userId;
-        $this->errorManager->addError('api', $response, $accountDetails);
 
+        if($this->hasEncryptionError($accessToken)){
+            $connectedAccounts[$userId]['encryption_error'] = true;
+            $connectedAccounts[$userId]['error_code'] = 999;
+            if(method_exists(Helper::class, 'getEncryptionErrorData')){
+                $encryptionError = Helper::getEncryptionErrorData();
+                $response['error']['message'] = Arr::get($encryptionError, 'message');
+                $response['error']['code'] =  Arr::get($encryptionError, 'code');
+            }
+        }
+
+        $this->errorManager->addError('api', $response, $accountDetails);
         return $connectedAccounts;
     }
 
