@@ -4,7 +4,7 @@ Tags: TikTok, tiktok feed, tiktok video, tiktok plugin, tiktok gallery
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -183,6 +183,9 @@ Please review the terms of use and privacy policy of TikTok to understand how yo
 7. 100% Responsive on all devices
 
 == Changelog ==
+
+1.1.7
+- Improved Error Handling: Added encryption error detection, with clear, user-friendly error messages (includes error code 999 for access token issues).
 
 1.1.6
 - Fixed TikTok feed disconnection issue by improving token management, adding a safety buffer for expiration checks, and enhancing error handling.
