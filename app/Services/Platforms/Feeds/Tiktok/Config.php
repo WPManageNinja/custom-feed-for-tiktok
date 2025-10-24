@@ -31,6 +31,7 @@ class Config
         return array(
             'feed_settings' => array(
                 'platform'                  => 'tiktok',
+                'created_from_onboarding'   => Arr::get($settings,'created_from_onboarding', false),
                 'template'                  => Arr::get($settings, 'template', 'template1'),
                 'layout_type'               => Arr::get($settings, 'layout_type', 'grid'),
                 'responsive_column_number'  => array(

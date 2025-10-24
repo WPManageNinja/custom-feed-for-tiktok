@@ -473,11 +473,11 @@ class TiktokFeed extends BaseFeed
             $settings['dynamic']['error_message']['error_message'] = __('TikTok feeds are not being displayed due to the "optimize images" option being disabled. If the GDPR settings are set to "Yes," it is necessary to enable the optimize images option.', 'custom-feed-for-tiktok');
         }
 
-//        $isActive = get_option('wpsr_'.$this->platform.'_connected_sources_config');
-//        if ( class_exists('\WPSocialReviews\App\Services\Onboarding\OnboardingHelper') && Arr::get($settings, 'feed_settings.created_from_onboarding') && !$isActive) {
-//            $onboardingHelper = new \WPSocialReviews\App\Services\Onboarding\OnboardingHelper();
-//            $onboardingHelper::applyOnboardingSettings($postId, 'tiktok', $settings);
-//        }
+        $isActive = get_option('wpsr_'.$this->platform.'_connected_sources_config');
+        if ( class_exists('\WPSocialReviews\App\Services\Onboarding\OnboardingHelper') && Arr::get($settings, 'feed_settings.created_from_onboarding') && !$isActive) {
+            $onboardingHelper = new \WPSocialReviews\App\Services\Onboarding\OnboardingHelper();
+            $onboardingHelper::applyOnboardingSettings($postId, 'tiktok', $settings);
+        }
 
         return $settings;
     }
