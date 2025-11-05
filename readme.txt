@@ -1,7 +1,7 @@
 === Custom Feed for TikTok - Social Post Feed Plugin for TikTok ===
 Contributors: techjewel, devutpol, tanjimtc71, wpmanageninja
 Tags: TikTok, tiktok feed, tiktok video, tiktok plugin, tiktok gallery
-Requires at least: 5.6
+Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 7.4
 Stable tag: 1.1.8
