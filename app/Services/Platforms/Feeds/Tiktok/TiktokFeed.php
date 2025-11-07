@@ -524,6 +524,12 @@ class TiktokFeed extends BaseFeed
             (new \WPSocialReviewsPro\App\Services\TemplateCssHandler())->saveCss($settings, $postId);
         }
 
+        // Remove template from onboarding sessions since it's now been edited
+        if ( class_exists('\WPSocialReviews\App\Services\Onboarding\OnboardingHelper') && Arr::get($settings, 'feed_settings.created_from_onboarding')) {
+            $onboardingHelper = new \WPSocialReviews\App\Services\Onboarding\OnboardingHelper();
+            $onboardingHelper::removeFromOnboardingSessions($postId);
+        }
+
         // unset them for wpsr_template_config meta
         $unsetKeys = ['dynamic', 'feed_type', 'styles_config', 'styles', 'responsive_styles'];
         foreach ($unsetKeys as $key){
