@@ -123,6 +123,8 @@ class Config
 
     public function getStyleElement()
     {
+        $has_pro = defined('WPSOCIALREVIEWS_PRO') && WPSOCIALREVIEWS_PRO;
+
         return array(
             'header' => array(
                 'title' => __('Header', 'custom-feed-for-tiktok'),
@@ -143,6 +145,7 @@ class Config
                             'fieldKey'  => 'text_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         )
                     )
                 ),
@@ -162,6 +165,7 @@ class Config
                             'fieldKey'  => 'text_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         ),
                     )
                 ),
@@ -178,6 +182,7 @@ class Config
                             'fieldKey'  => 'text_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         ),
                     )
                 ),
@@ -194,6 +199,7 @@ class Config
                             'fieldKey'  => 'background_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         )
                     )
                 )
@@ -214,6 +220,7 @@ class Config
                             'fieldKey'  => 'text_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         )
                     )
                 ),
@@ -230,6 +237,7 @@ class Config
                             'fieldKey'  => 'text_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         )
                     )
                 ),
@@ -246,6 +254,7 @@ class Config
                             'fieldKey'  => 'text_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         )
                     )
                 ),
@@ -262,6 +271,7 @@ class Config
                             'fieldKey'  => 'text_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         )
                     )
                 ),
@@ -277,6 +287,7 @@ class Config
                             'fieldKey'  => 'text_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         )
                     )
                 ),
@@ -296,12 +307,14 @@ class Config
                             'fieldKey'  => 'text_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         ),
                         array(
                             'title'      => __('Background Color:', 'custom-feed-for-tiktok'),
                             'fieldKey'  => 'background_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         )
                     )
                 )
@@ -321,12 +334,14 @@ class Config
                             'fieldKey'  => 'text_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         ),
                         array(
                             'title'      => __('Background Color:', 'custom-feed-for-tiktok'),
                             'fieldKey'  => 'background_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         ),
                     )
                 )
@@ -346,6 +361,7 @@ class Config
                             'fieldKey'  => 'background_color',
                             'type'      => 'color_picker',
                             'flex'      => true,
+                            'disabled' => !$has_pro,
                         )
                     )
                 )
