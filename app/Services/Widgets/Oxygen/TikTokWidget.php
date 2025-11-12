@@ -454,15 +454,9 @@ class TikTokWidget extends OxygenEl
 
     function init() {
         $this->El->useAJAXControls();
-        $post_id 	= isset($_REQUEST['post_id']) ? intval( $_REQUEST['post_id'] ) : null;
 
-        if (!isset($_REQUEST['nonce']) || !wp_verify_nonce($_REQUEST['nonce'], 'oxygen-nonce-' . $post_id) ) {
-            return;
-        }
-
-        $ct_builder = isset($_GET['ct_builder']) && sanitize_text_field(wp_unslash($_GET['ct_builder']));
-
-        if ($ct_builder) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Checking for Oxygen Builder context, not processing form data
+        if ( isset( $_GET['ct_builder'] ) ) {
             wp_enqueue_style(
                 'wp_social_ninja_tt',
                 WPSOCIALREVIEWS_URL . 'assets/css/wp_social_ninja_tt.css',
