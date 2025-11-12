@@ -128,7 +128,7 @@ class TiktokTemplateHandler
         ];
 
         if ($templateNumber === 'template2') {
-            $html = apply_filters('wpsocialreviews/add_tiktok_feed_template', $template_body_data);
+            $html = apply_filters('custom_feed_for_tiktok/add_tiktok_feed_template', $template_body_data); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
             return $html;
         } else {
             return (string)$this->loadView('public/feeds-templates/tiktok/template1', $template_body_data);

@@ -1,4 +1,12 @@
 <?php
+
+/**
+ * Oxygen Builder TikTok Widget Integration
+ *
+ * This integrates TikTok feeds with Oxygen Builder page builder.
+ * Uses Oxygen's specific hook naming conventions for proper integration.
+ */
+
 namespace CustomFeedForTiktok\Application\Services\Widgets\Oxygen;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -26,6 +34,6 @@ class OxygenWidget
 
     public function registerAddPlusSubsections()
     {
-        do_action("oxygen_add_plus_wpsocialninja_tiktok");
+        do_action("oxygen_add_plus_wpsocialninja_tiktok"); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
     }
 }

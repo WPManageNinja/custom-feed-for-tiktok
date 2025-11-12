@@ -1,11 +1,7 @@
 <?php
-use WPSocialReviews\Framework\Support\Arr;
-
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
 }
-
-$mediaUrl = Arr::get($feed, 'media.url', '');
 ?>
 <div class="wpsr-feed-description-link">
     <p class="wpsr-feed-description-text wpsr-tiktok-feed-content">

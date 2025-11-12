@@ -1,6 +1,10 @@
 <?php
 /**
- * Class CustomFeedForTiktok\Application\Services\Widgets\Beaver\TikTok\CFFT_Fl_TikTok_Module
+ * Beaver Builder TikTok Module
+ *
+ * This is a Beaver Builder integration module for the Custom Feed for TikTok plugin.
+ * The class name follows Beaver Builder's naming conventions (CFFT_Fl_TikTok_Module)
+ * rather than WordPress plugin conventions for proper Beaver Builder integration.
  *
  * @copyright 2024 Fastline Media LLC
  * @license   https://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
@@ -15,12 +19,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 
 /**
- * This is an example module with only the basic
- * setup necessary to get it working.
+ * Beaver Builder TikTok Feed Module
+ *
+ * Integrates TikTok feeds with Beaver Builder page builder.
+ * Class name follows Beaver Builder conventions for proper integration.
  *
  * @class CFFT_Fl_TikTok_Module
  */
-class CFFT_Fl_TikTok_Module extends FLBuilderModule {
+class CFFT_Fl_TikTok_Module extends FLBuilderModule { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound
 
     /**
      * Constructor function for the module. You must pass the

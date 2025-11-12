@@ -20,12 +20,12 @@ if( $layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO')) {
     echo '</div>';
 }
 
-$mt_30 = $column_gaps === 'no_gap' ? 'wpsr-mt-20' : '';
-echo '<div class="wpsr-tiktok-feed-footer wpsr-tiktok-feed-follow-button-group wpsr-row ' . esc_attr($mt_30) . '">';
+$wpsr_tiktok_mt_30 = $column_gaps === 'no_gap' ? 'wpsr-mt-20' : ''; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+echo '<div class="wpsr-tiktok-feed-footer wpsr-tiktok-feed-follow-button-group wpsr-row ' . esc_attr($wpsr_tiktok_mt_30) . '">';
 //pagination
-$feed_type = Arr::get($feed_settings, 'source_settings.feed_type', '');
+$wpsr_tiktok_feed_type = Arr::get($feed_settings, 'source_settings.feed_type', ''); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 if (count($feeds) > $paginate && $layout_type !== 'carousel' && $pagination_type === 'load_more' ) {
-    do_action('custom_feed_for_tiktok/load_more_tiktok_button', $feed_settings, $templateId, $paginate, $layout_type, $total, $feed_type);
+    do_action('custom_feed_for_tiktok/load_more_tiktok_button', $feed_settings, $templateId, $paginate, $layout_type, $total, $wpsr_tiktok_feed_type);
 }
 
 if (Arr::get($feed_settings, 'follow_button_settings.follow_button_position') !== 'header' && Arr::get($feed_settings, 'follow_button_settings.display_follow_button') ) {

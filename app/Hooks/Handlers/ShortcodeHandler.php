@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Shortcode Handler
+ *
+ * This addon plugin integrates with WP Social Reviews base plugin.
+ * Uses 'wpsocialreviews/*' hooks for template rendering integration.
+ */
+
 namespace CustomFeedForTiktok\Application\Hooks\Handlers;
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
@@ -18,8 +25,9 @@ class ShortcodeHandler
     use LoadView;
     public function renderTiktokTemplate($templateId, $platform)
     {
+        // Clear LiteSpeed cache if plugin is active
         if (defined('LSCWP_V')) {
-            do_action('litespeed_tag_add', 'wpsn_purge_tiktok');
+            do_action('litespeed_tag_add', 'wpsn_purge_tiktok'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
         }
 
         $shortcodeHandler = new BaseShortCodeHandler();
@@ -28,7 +36,7 @@ class ShortcodeHandler
         $account_ids = Arr::get($template_meta, 'feed_settings.source_settings.selected_accounts');
 
         if(defined('WPSOCIALREVIEWS_VERSION') && version_compare(WPSOCIALREVIEWS_VERSION, '3.14.0', '>=')) {
-            do_action('wpsocialreviews/before_display_tiktok_feed', $account_ids);
+            do_action('wpsocialreviews/before_display_tiktok_feed', $account_ids); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
         }
         $feed = (new TiktokFeed())->getTemplateMeta($template_meta, $templateId);
         $settings      = $shortcodeHandler->formatFeedSettings($feed);
@@ -47,7 +55,7 @@ class ShortcodeHandler
 //        $file = $templateMapping[$template];
 
         $layout = Arr::get($settings, 'feed_settings.layout_type');
-        do_action('wp_social_review_loading_layout_' . $layout, $templateId, $settings);
+        do_action('wp_social_review_loading_layout_' . $layout, $templateId, $settings); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
         //pagination settings
         $pagination_settings = $shortcodeHandler->formatPaginationSettings($feed);
@@ -84,14 +92,14 @@ class ShortcodeHandler
         }
 
         $shortcodeHandler->enqueueScripts();
-        do_action('wpsocialreviews/load_template_assets', $templateId);
+        do_action('wpsocialreviews/load_template_assets', $templateId); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
         $html = '';
         $error_data = Arr::get($settings['dynamic'], 'error_message');
         if (Arr::get($error_data, 'error_message')) {
-            $html .= apply_filters('wpsocialreviews/display_frontend_error_message', $platform, $error_data['error_message'], $account_ids);
+            $html .= apply_filters('wpsocialreviews/display_frontend_error_message', $platform, $error_data['error_message'], $account_ids); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
         } elseif ($error_data) {
-            $html .= apply_filters('wpsocialreviews/display_frontend_error_message', $platform, $error_data, $account_ids);
+            $html .= apply_filters('wpsocialreviews/display_frontend_error_message', $platform, $error_data, $account_ids); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
         }
 
         $template_body_data = [
@@ -117,7 +125,7 @@ class ShortcodeHandler
         ));
 
         if (defined('WPSOCIALREVIEWS_PRO') && $template !== 'template1') {
-            $html .= apply_filters('wpsocialreviews/add_tiktok_feed_template', $template_body_data);
+            $html .= apply_filters('custom_feed_for_tiktok/add_tiktok_feed_template', $template_body_data);
         } else {
             $html .= $this->loadView('public/feeds-templates/tiktok/template1', $template_body_data);
         }
