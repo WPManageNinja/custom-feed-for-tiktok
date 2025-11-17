@@ -186,6 +186,7 @@ Please review the terms of use and privacy policy of TikTok to understand how yo
 
 1.1.8
 - Removed redundant load_plugin_textdomain() initialization
+- Improved sanitization and escaping for imported feed content
 
 1.1.7
 - Improved Error Handling: Added encryption error detection, with clear, user-friendly error messages (includes error code 999 for access token issues).
