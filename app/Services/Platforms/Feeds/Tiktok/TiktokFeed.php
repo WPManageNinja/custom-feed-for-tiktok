@@ -896,6 +896,12 @@ class TiktokFeed extends BaseFeed
 
         $formattedVideos = [];
         foreach ($videos as $index => $video) {
+            $title = Arr::get($video, 'title', '');
+            $video_description = Arr::get($video, 'video_description', '');
+            if(method_exists(Helper::class, 'sanitizeText')){
+                $title = Helper::sanitizeText($title);
+                $video_description = Helper::sanitizeText($video_description);
+            }
             $user = Arr::get($video, 'from', []);
             $formattedUser = $this->getFormattedUser($user);
             $formattedVideos[$index]['id'] = Arr::get($video, 'id', '');
@@ -908,8 +914,8 @@ class TiktokFeed extends BaseFeed
             $formattedVideos[$index]['media'] = $formattedMedia;
 
             $formattedVideos[$index]['created_at'] = Arr::get($video, 'create_time', '');
-            $formattedVideos[$index]['title'] = Arr::get($video, 'title', '');
-            $formattedVideos[$index]['text'] = Arr::get($video, 'video_description', '');
+            $formattedVideos[$index]['title'] = $title;
+            $formattedVideos[$index]['text'] = $video_description;
         }
 
         $allData['videos'] = $formattedVideos;
