@@ -4,7 +4,7 @@ Tags: TikTok, tiktok feed, tiktok video, tiktok plugin, tiktok gallery
 Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.8
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -183,6 +183,10 @@ Please review the terms of use and privacy policy of TikTok to understand how yo
 7. 100% Responsive on all devices
 
 == Changelog ==
+
+1.2.0
+- Enhance HTML sanitization for user-generated content
+- New UI improvements for better user experience
 
 1.1.8
 - Removed redundant load_plugin_textdomain() initialization
