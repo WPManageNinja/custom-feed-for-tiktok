@@ -116,6 +116,10 @@ class Config
                     'pagination_type' => Arr::get($settings,'pagination_settings.pagination_type', 'none'),
                     'load_more_button_text' => sanitize_text_field(Arr::get($settings, 'pagination_settings.load_more_button_text', __('Load More', 'custom-feed-for-tiktok'))),
                     'paginate'        => (int) Arr::get($settings,'pagination_settings.paginate', 6),
+                    'paginate_number'       => array(
+                        'desktop' => (int) Arr::get($settings, 'pagination_settings.paginate_number.desktop', Arr::get($settings, 'pagination_settings.paginate', 6)),
+                        'mobile'  => (int) Arr::get($settings, 'pagination_settings.paginate_number.mobile', 6)
+                    ),
                 ),
             ),
         );
