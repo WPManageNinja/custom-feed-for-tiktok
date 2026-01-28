@@ -307,6 +307,9 @@ class Config
                     'padding' => true,
                     'border' => true,
                     'border_radius' => true,
+                    'slider' => array(
+                        'title' => __('Top Spacing', 'custom-feed-for-tiktok'),
+                    ),
                     'styles' => array(
                         array(
                             'title'      => __('Text Color:', 'custom-feed-for-tiktok'),
@@ -366,6 +369,9 @@ class Config
                     'padding' => true,
                     'border' => true,
                     'border_radius' => true,
+                    'slider' => array(
+                        'title' => __('Top Spacing', 'custom-feed-for-tiktok'),
+                    ),
                     'styles' => array(
                         array(
                             'title'      => __('Text Color:', 'custom-feed-for-tiktok'),
@@ -806,6 +812,13 @@ class Config
                         ),
                         'linked' => Arr::get($settings,'styles.follow_button.padding.linked', false),
                     ),
+                    'slider'  => array(
+                        'top' => array(
+                            'desktop' => Arr::get($settings,'styles.follow_button.slider.top.desktop', 0),
+                            'tablet' => Arr::get($settings,'styles.follow_button.slider.top.tablet', 0),
+                            'mobile' => Arr::get($settings,'styles.follow_button.slider.top.mobile', 0),
+                        ),
+                    ),
                     'border_radius' => array(
                         'top' => array(
                             'desktop' => Arr::get($settings,'styles.follow_button.border_radius.top.desktop', ''),
@@ -936,7 +949,13 @@ class Config
                         ),
                         'linked' => Arr::get($settings,'styles.tiktok_pagination.border_radius.linked', false),
                     ),
-
+                    'slider'  => array(
+                        'top' => array(
+                            'desktop' => Arr::get($settings,'styles.tiktok_pagination.slider.top.desktop', 0),
+                            'tablet' => Arr::get($settings,'styles.tiktok_pagination.slider.top.tablet', 0),
+                            'mobile' => Arr::get($settings,'styles.tiktok_pagination.slider.top.mobile', 0),
+                        ),
+                    ),
                 ),
                 'tiktok_pagination_hover' => array(
                     'selector' => $prefix.' .wpsr_more:hover',
