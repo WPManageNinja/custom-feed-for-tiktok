@@ -1,4 +1,5 @@
 <?php
+defined('ABSPATH') or die;
 
 /**
  * All registered action's handlers should be in app\Hooks\Handlers,
