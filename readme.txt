@@ -2,9 +2,9 @@
 Contributors: techjewel, devutpol, tanjimtc71, wpmanageninja
 Tags: TikTok, tiktok feed, tiktok video, tiktok plugin, tiktok gallery
 Requires at least: 6.2
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -183,6 +183,10 @@ Please review the terms of use and privacy policy of TikTok to understand how yo
 7. 100% Responsive on all devices
 
 == Changelog ==
+
+1.2.1
+- Added device-based responsive control for ‘Load More’ behavior.
+- Added advanced style options for templates, including box shadow, border radius, hover effects, and padding and spacing controls. (Pro)
 
 1.2.0
 - Enhance HTML sanitization for user-generated content
