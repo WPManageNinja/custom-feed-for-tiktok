@@ -61,7 +61,7 @@ class Config
                     'resolution'              => Arr::get($settings,'post_settings.resolution', 'full'),
                     'display_mode'            => Arr::get($settings,'post_settings.display_mode', 'tiktok'),
                     'display_author_photo'    => Arr::get($settings,'post_settings.display_author_photo', 'true'),
-                    'display_author_name'     => Arr::get($settings,'post_settings.display_author_photo', 'true'),
+                    'display_author_name'     => Arr::get($settings,'post_settings.display_author_name', 'true'),
                     'display_date'            => Arr::get($settings,'post_settings.display_date', 'true'),
                     'display_description'     => Arr::get($settings,'post_settings.display_description', 'true'),
                     'display_views_count'     => Arr::get($settings,'post_settings.display_views_count', 'true'),
