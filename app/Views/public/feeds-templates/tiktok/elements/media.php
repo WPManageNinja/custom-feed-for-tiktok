@@ -13,10 +13,10 @@ $wpsr_tiktok_description = Arr::get($feed, 'text', ''); // phpcs:ignore WordPres
 $wpsr_tiktok_display_mode = Arr::get($template_meta, 'post_settings.display_mode'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $wpsr_tiktok_media_url = Arr::get($feed, 'media_url', ''); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $wpsr_tiktok_default_media = Arr::get($feed, 'media.preview_image_url', ''); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-$wpsr_tiktok_img_class = !empty($wpsr_tiktok_media_url) && !str_contains($wpsr_tiktok_media_url, 'placeholder') ? 'wpsr-tt-post-img wpsr-show' : 'wpsr-tt-post-img wpsr-hide'; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+$wpsr_tiktok_img_class = !empty($wpsr_tiktok_media_url) && strpos($wpsr_tiktok_media_url, 'placeholder') === false ? 'wpsr-tt-post-img wpsr-show' : 'wpsr-tt-post-img wpsr-hide'; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $wpsr_tiktok_video_url = 'https://www.tiktok.com/@'.$wpsr_tiktok_user_name.'/video/'.$wpsr_tiktok_feed_id; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $wpsr_tiktok_image_optimization = Arr::get($image_settings, 'optimized_images'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-$wpsr_tiktok_animation_img_class = str_contains($wpsr_tiktok_media_url, 'placeholder') && $wpsr_tiktok_media_url ? 'wpsr-animated-background' : ''; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+$wpsr_tiktok_animation_img_class = $wpsr_tiktok_media_url && strpos($wpsr_tiktok_media_url, 'placeholder') !== false ? 'wpsr-animated-background' : ''; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $wpsr_tiktok_attrs = [
