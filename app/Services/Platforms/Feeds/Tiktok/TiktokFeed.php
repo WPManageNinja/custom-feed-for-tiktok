@@ -665,6 +665,8 @@ class TiktokFeed extends BaseFeed
         if(($totalFeed % $perPage) > 0){
             $pages++;
         }
+        // Subtract 1 because the first page is fetched before the pagination loop
+        $remainingPages = max(0, $pages - 1);
 
 
         $accountCacheName = '';
@@ -749,7 +751,7 @@ class TiktokFeed extends BaseFeed
 
                     if (isset($account_feeds['data']['has_more']) && !empty($account_feeds['data']['has_more']) && isset($account_feeds['data']['cursor']) && ($account_feeds['data']['cursor']) !== 0) {
                         $x = 0;
-                        while ($x < $pages) {
+                        while ($x < $remainingPages) {
                             $cursorIs = $account_feeds['data']['cursor'];
                             $fetchUrl = $this->remoteFetchUrl . $fields;
                             $body_args = [
