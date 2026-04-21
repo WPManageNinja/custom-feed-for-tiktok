@@ -366,12 +366,16 @@ class TiktokFeed extends BaseFeed
         if(!empty(Arr::get($apiSettings, 'selected_accounts'))) {
             $response = $this->apiConnection($apiSettings);
             if(isset($response['error_message']) && empty(Arr::get($response, 'items'))) {
-                $settings['dynamic']['error_message']['error_message'] = $response['error_message'];
+                $settings['dynamic']['error_message'] = [
+                    'error_message' => $response['error_message']
+                ];
             } else {
                 $data['items'] = $response['items'];
             }
         } else {
-            $settings['dynamic']['error_message']['error_message'] = __('Please select an Account to get feeds.', 'custom-feed-for-tiktok');
+            $settings['dynamic']['error_message'] = [
+                'error_message' => __('Please select an Account to get feeds.', 'custom-feed-for-tiktok')
+            ];
         }
 
         $account = Arr::get($feed_settings, 'header_settings.account_to_show');
@@ -470,7 +474,9 @@ class TiktokFeed extends BaseFeed
         if($has_gdpr === "true" && $optimized_images == "false") {
             $settings['dynamic']['items'] = [];
             $settings['dynamic']['header'] = [];
-            $settings['dynamic']['error_message']['error_message'] = __('TikTok feeds are not being displayed due to the "optimize images" option being disabled. If the GDPR settings are set to "Yes," it is necessary to enable the optimize images option.', 'custom-feed-for-tiktok');
+            $settings['dynamic']['error_message'] = [
+                'error_message' => __('TikTok feeds are not being displayed due to the "optimize images" option being disabled. If the GDPR settings are set to "Yes," it is necessary to enable the optimize images option.', 'custom-feed-for-tiktok')
+            ];
         }
 
         if ( class_exists('\WPSocialReviews\App\Services\Onboarding\OnboardingHelper') && Arr::get($settings, 'feed_settings.created_from_onboarding')) {
