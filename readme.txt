@@ -1,105 +1,117 @@
-=== Custom Feed for TikTok - Social Post Feed Plugin for TikTok ===
+=== Custom Feed for TikTok – Social Post Feed Plugin for TikTok ===
 Contributors: techjewel, devutpol, tanjimtc71, wpmanageninja
-Tags: TikTok, tiktok feed, tiktok video, tiktok plugin, tiktok gallery
+Tags: TikTok feed, tiktok feed wordpress, tiktok gallery plugin, TikTok plugin, TikTok video
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Explore the power of Custom Feed for TikTok, the top-notch plugin for displaying your videos with user-friendly and up-to-date features
+Display TikTok videos on your WordPress site with a customizable option. No coding needed. Works with Elementor, Oxygen, and Beaver Builder.
 
 == Description ==
 
-**Custom Feed for TikTok** is the most feature-rich, easy-to-use TikTok feed plugin for your WordPress website. Display your TikTok videos with the most user-friendly and updated features of Custom Feed for TikTok!
+**Custom Feed for TikTok is a WordPress plugin that lets you show your TikTok videos directly on your website, with a quick and simple setup.**
 
 [youtube https://www.youtube.com/watch?v=RRLsvexsRBg]
 
-This plugin is specially built for TikTok feed to give you the smoothest integration and the most handy experience for embedding your TikTok gallery on your website. You will get multiple features to showcase your TikTok feed by different template layouts, filter through hashtags, style preferences to suit your website, and many more with this TikTok feed plugin for WordPress.
+Connect your TikTok account, pick a layout, and embed your TikTok feed anywhere on your site using a shortcode. Your feed updates automatically every time you post on TikTok.
 
-👉 Official Webpage: [Custom Feed for TikTok](https://wpsocialninja.com/platforms/tiktok-feed/)
-👉 Join FB Community: [Facebook Group](https://www.facebook.com/groups/wpsocial)
-👉 User Guide: [Documents](https://wpsocialninja.com/docs/)
-👉 Get Support: [Support Ticket](https://wpmanageninja.com/support-tickets/)
+👉 **Official Page:** [Custom Feed for TikTok](https://wpsocialninja.com/platforms/tiktok-feed/)
+👉 **Setup Guide:** [Documentation](https://docs.wpsocialninja.com/guide/social-feeds/tiktok-feed-configuration.html)
+👉 **Live Demo:** [See it in action](https://wpsocialninja.com/demo-page/)
+👉 **Support:** [Submit a Ticket](https://wpmanageninja.com/support-tickets/)
+👉 **Community:** [Join the Facebook Group](Community)
 
-== Why Custom Feed for TikTok is the best TikTok feed plugin ==
+== Who is this plugin for? ==
+**Content Creators & Influencers:** Show your latest TikTok videos on your website or portfolio. Turn visitors into followers by promoting your content directly.
+**Small Business Owners:** Display your products, services, or behind-the-scenes TikTok videos on your site. Keep your website updated without creating extra content.
+**E-commerce & WordPress Store Owners:** Show your TikTok product videos in your store. Add unboxing videos, and demos directly to product pages to help customers make buying decisions.
+**Digital Marketers:** Use TikTok content to boost engagement on landing pages and campaigns. Show real content that builds trust and improves conversions.
+**Agencies & Freelancers:** Manage multiple TikTok accounts from one place. Display different feeds for different clients easily on the same site.
+**Media Sites & Bloggers:** Add a TikTok video gallery to your posts or pages. Show relevant content using hashtags to match your topics.
+== Why Choose Custom Feed for TikTok? ==
 
-**Easy to Integrate:** It’s easy to start with Custom Feed for TikTok; without any hassle, you can create an Access code to integrate your account.
+**Easy setup:** Get your feed up and running in minutes with a simple visual builder.
 
-**Customizable:** To make your TikTok feed widget how you wish, you will get advanced features and styling options with this TikTok feed plugin.
+**Flexible layouts & styling:** Customize how your feed looks with layout options, colors, spacing, and display settings to match your site.
 
-**Popup box:** The customizable Popup will allow you to open your TikTok posts without leaving your site.
+**Auto-sync feeds:** New videos appear on your site automatically without manual updates.
 
-**Responsiveness:** The responsive TikTok feed will fit with any device wherever you see it.
+**Works with your page builder:** Compatible with Elementor, Oxygen, and Beaver Builder.
 
-**SEO-Friendly:** We use shortcodes and ALT tags (sourced from TikTok post captions) for SEO-friendly widgets and employ caching for top-notch performance. Boost performance with caching, and we ensure optimal integration with maintained nofollow and dofollow attributes.
+**Popup video player:** Let visitors watch videos in a lightbox without leaving your site.
 
-**Embed multiple accounts:** If you have multiple user accounts on TikTok and want to showcase them on your website, you can connect them with Custom Feed for TikTok.
+**Performance optimized:** Images are stored locally for faster loading and fewer API requests.
 
-**Third-Party Integration:** It has three popular third-party integrations: **Elementor Page Builder**, **Oxygen Page Builder**, and **Beaver Page Builder**.
+**Multiple accounts, one dashboard:** Connect and manage multiple accounts from one place.
 
-**Auto Sync:** Custom Feed for TikTok will save you from manual feed updates; the auto-sync functionality will automatically update your feeds.
+**Fully responsive:** Your feed adapts smoothly to mobile, tablet, and desktop.
 
-**24/7 Customer Support:** Our support team is always ready to solve your issues. For any queries or help, you will find us through the support ticket.
+**SEO-friendly:** Clean structure with captions used as ALT text to help visibility.
 
-== Benefits of TikTok Feed ==
+**GDPR compliant:** Load feeds in a privacy-friendly way and give users control when needed.
 
-**User engagement:** Embed TikTok feed with Custom Feed for TikTok and improve user engagement.
+== Free Features ==
 
-**Generate sales:** Share your TikTok videos to reach a larger audience, enhance your brand promotion and drive more sales.
+**Display Your TikTok Feed:** Connect your TikTok account and display your videos in a responsive grid gallery on any WordPress page or post.
 
-**Attract new TikTok followers:** When people see your TikTok videos on your website, it’s easy to convert them from website visitors to your TikTok followers!
+**Grid Layout with Adjustable Columns:** Choose how many columns to display and set the spacing between videos. Works on all screen sizes.
 
-**User experience & SEO:** Improve the SEO of your website with your TikTok feed. You can maximize the visitors' spend on your site, increase your click-through rate, and lower the bounce rate.
+**Control How Many Videos Show:** Set a specific number of TikTok videos to display. Useful for keeping pages clean and focused.
 
-**Boosts content visibility:** You can improve your content visibility and get maximum reach by showcasing your TikTok posts on the website.
+**Post Order:** Display videos in ascending or descending order based on when they were posted.
 
-**User-generated content:** Bring your UGC on your website with Custom Feed for TikTok. Make your site trendy and updated using specific keywords/hashtags.
+**Feed Settings:** The multiple feed setting options will allow you to open your post by default or on the TikTok site. Also, you can choose to display/hide the Author Name, Photo, TikTok video caption, or Platform Icon.
 
-== Custom Feed for TikTok free features ==
+**Header Display:** Show your TikTok profile picture and account name above the feed, or hide the header entirely.
 
-**Layout & columns:** For displaying your TikTok feed, you will get **Grid** layout type and adjust it with the number of columns and gaps between them.
+**Pagination:** Split your videos across multiple pages. Set how many videos appear per page and customize the pagination button text.
+
+**Feed Caching:** Set a cache refresh interval to control how often the plugin fetches new data from TikTok. Improves performance and reduces API calls.
+
+**Shortcode Embed:** Add your TikTok feed anywhere using the shortcode: `[wp_social_ninja id="template_id" platform="tiktok"]`
+
+== Pro Features ==
+
+**Multiple TikTok Accounts:** Connect multiple TikTok accounts and display feeds, separately or combined into a single gallery.
+
+**Masonry Layout:** Show your TikTok feed in a masonry grid for a clean, Pinterest-style look.
+
+**Carousel Slider:** Display your TikTok feed as a horizontal carousel with autoplay, slide speed control, number of slides visible, and navigation type (arrows, dots, both).
+
+**Advanced Post Order:** Sort your feed by **Most Viewed**, **Most Liked**, **Ascending**, **Descending**, or **Random**.
 
 **Number of feeds:** This filter option of Custom Feed for TikTok will allow you to show how many feeds you want to show.
 
-**Posts order:** Display your TikTok feed with your desired post order from Ascending or Descending order.
+**Hashtag and Keyword Filtering:** Show only videos that include specific words or hashtags. Or hide videos containing certain terms. Useful for campaigns, product categories, or curated content pages.
 
-**Feed Settings:** The multiple feed setting options will allow you to open your post by default or on the TikTok site. Also, you can choose to display/hide the **Author Name**, **Photo**, **Description**, or **Platform Icon**.
+**Popup Video Player Settings:** Full control over what appears in the pop-up with **play button**, **video description**, like **count**, **share button**, and more.
 
-**Header Settings:** You can use the header part of your TikTok where you have a **Profile picture**, **Account Name**; with **Custom Feed for TikTok**, you are free to hide/display them in your feed.
+**Follow Button:** Add a TikTok Follow button to the header, footer, or both. Customize the button text.
 
-**Pagination:** If you have multiple videos and want to keep them on multiple pages, you have **Pagination** option; it will let you select how many feeds you want to show on one page and customize the button text.
+**Advanced Style Controls:** Granular styling for every element like **background color**, **border radius**, **font size**, **button styles**, **box shadows**, and more. Match your exact brand without touching code.
 
-**Feed Cache Time:** Custom Feed for TikTok lets you cache the data it receives from TikTok to speed up the website. You can set the period for feed loading time.
+== How to Set Up Your TikTok Feed (Quick Start) ==
 
-== Custom Feed for TikTok Pro features ==
+1. Install and activate **Custom Feed for TikTok** from the WordPress plugin directory
+2. In your WordPress dashboard, go to **WP Social Ninja → Platforms → TikTok**
+3. Generate your TikTok access code to connect your account
+4. Click **Add New Template** and choose your layout
+5. Configure your feed setting with number of videos, post order, header display, and more.
+6. Click **Save** and copy the shortcode.
+7. Paste the shortcode into any page, post, or widget. Your TikTok feed is live.
 
-**Multiple User Accounts:** The limitless features help you not just connect one account but also connect multiple TikTok accounts to your WordPress website.
+== Other Plugins by the Same Team ==
 
-**Carousel Layout:** Organize your TikTok feed with Carousel settings from **Layout Type**. Adjust it with **Autoplay**, **Autoplay Speed**, **Slides to Show**, **Slides to Scroll**, and **Navigation Type** options.
-
-**Posts Order Variations:** Choose your favorite order on how you want to display your feed from the options- **Ascending**, **Descending**, **Most Viewed**, **Most Liked**, and **Random**.
-
-**Number of Feeds to Display:** Decorate your page with the number of TikTok videos you need to display; just set the number from **Filter** settings.
-
-**Filter Feed with search terms/Hashtags:** Show or hide your TikTok post & display by targeting specific words/hashtags on your website.
-
-**Open posts on Platform/Popup box:** You can open your TikTok feed with the original platform post or open it with a popup box on your site.
-
-**Popup Settings:** Turn on the Popup settings button to display an organized website; it has multiple options where you can select which item to keep on your Pop-up screen.
-
-**Display Follow Button:** You can place the Follow button either in **Header**,**Footer**, or **Both**; also customize the button text.
-
-**Advanced Style Setting:** Lastly, give a vibrant look to your website with your TikTok feed with in-depth styling options, where you can specifically work on each element without having any technical knowledge.
-
-== Other plugins by the same team ==
 <ul>
+
+<li><a href="https://wordpress.org/plugins/wp-social-reviews/" target="_blank">WP Social Ninja</a></li>
 	<li><a href="https://wordpress.org/plugins/fluentform/" target="_blank">Contact Form Plugin – Fastest Contact Form Builder Plugin for WordPress by Fluent Forms</a></li>
     <li><a href="https://wordpress.org/plugins/fluent-crm/" target="_blank">Email Marketing, Newsletter, Email Automation and CRM Plugin for WordPress by FluentCRM</a></li>
     <li><a href="https://wordpress.org/plugins/fluent-support/" target="_blank">Fluent Support – WordPress Helpdesk and Customer Support Ticket Plugin</a></li>
 	<li><a href="https://wordpress.org/plugins/ninja-tables/" target="_blank">Ninja Tables – Best Data Table Plugin for WordPress</a></li>
-	<li><a href="https://wordpress.org/plugins/wp-payment-form/" target="_blank">Simple Payment Donations & Subscriptions Plugin by Paymattic – Best Payments Plugin for WP</a></li>
 	<li><a href="https://wordpress.org/plugins/fluent-smtp/" target="_blank">FluentSMTP – WP Mail SMTP, Amazon SES, SendGrid, MailGun and Any SMTP Connector Plugin</a></li>
 </ul>
 
@@ -113,76 +125,71 @@ Install from WordPress Admin Panel:
 3. Type “Custom Feed for TikTok” on the Search bar and enter
 4. Find this plugin and Click “Install Now”
 5. Activate The Plugin
-6. Use [wp_social_ninja id="template_id" platform="tiktok"] Shortcode on your next page or post
 
 = Manual Installation =
+
 1. Download the plugin from the WordPress.org repository
 2. On your WordPress admin dashboard, go to Plugins > Add New > Upload Plugin
-3. Upload the downloaded Plugin (custom-feed-for-tiktok.zip) file and Click Install Now
+3. Upload the downloaded Plugin (custom-feed-for-tiktok.zip) file and click Install Now
 4. Activate “Custom Feed for TikTok” from your Plugins page
 5. Use Custom Feed for TikTok on your site from the WP Social Ninja dashboard
 
-== FAQ ==
+== Frequently Asked Questions ==
 
-= What is a TikTok Feed plugin? =
+= What is a TikTok feed plugin for WordPress? =
 
-A TikTok Feed plugin will let you fetch your TikTok videos and embed them on your website. Custom Feed for TikTok is one of the best TikTok feed plugins for your WordPress website, which will help you showcase your TikTok feed most simply and easily.
+A TikTok feed plugin for WordPress is a tool that connects your WordPress website to your TikTok account and automatically displays your TikTok videos in a customizable layout. Custom Feed for TikTok uses the TikTok Display API to fetch your videos and embed them on any page or post, without manual embedding or coding.
 
-= Can you embed a TikTok video on WordPress? =
+= How do I embed TikTok videos in WordPress? =
 
-Yes, embedding TikTok videos is easy when you use **Custom Feed for TikTok**, WordPress plugin for TikTok feed. With its easy installation process and unlimited customization options, you can create a TikTok feed and embed it on your WordPress website.
+Install Custom Feed for TikTok, connect your TikTok account, create a feed template, and paste the shortcode `[wp_social_ninja id="template_id" platform="tiktok"]` into any page or post. Your TikTok feed will appear immediately and update automatically when you post new videos.
 
-= How do I show the TikTok feed on my website? =
+= Does this TikTok plugin work without coding? =
 
-Here are the steps you need to follow to show your TikTok feed with Custom Feed for TikTok:
-
-Choose **TikTok** from the **Social Feed** on the “WP Social Ninja” dashboard
-Generate the Access code to connect your TikTok account
-Click on **Add New Template** to create your feed
-Use the customization and styling options from the settings panel
-Click on **Save** and copy the shortcode
-Paste it on the page you want to show on your WordPress website
+Yes. You can configure everything through a visual settings panel. No PHP or CSS needed.
 
 = Can I display multiple TikTok feeds on one page? =
 
-Of course you can! You are able to connect more than one account and fetch feeds from them. You just need to connect your accounts and select them from the Source>Select Account option on the settings panel.
+Yes. Create separate feed templates for different accounts or hashtags, then paste each shortcode into the page where you want it. You can display as many feeds as you need.
 
-= How to customize the TikTok feed? =
+= Can I show TikTok feeds from multiple accounts? =
 
-Custom Feed for TikTok has advanced customization and styling options to organize your TikTok feed. Once you connect your account with Custom Feed for TikTok, you can do the customization with just a few clicks; you don’t need to do any code or have any advanced skills.
+Yes, in the Pro version, you can connect multiple TikTok accounts and display them in separate feeds or combined into a single gallery.
+
+= Does this plugin work with Elementor? =
+
+Yes. Custom Feed for TikTok integrates natively with Elementor, Oxygen, and Beaver Builder. Add your TikTok feed widget to any page builder section without touching code.
+
+= Does this plugin work after TikTok API changes? =
+
+Yes. We regularly update the plugin to stay compatible with TikTok Display API. If your feed stops working, simply update to the latest version. If you still face issues, our support team is ready to help.
+
+= Is this TikTok feed plugin GDPR compliant? =
+
+Yes. WP Social Ninja is GDPR-compliant for social feeds. The plugin uses TikTok's official Display API and handles data according to TikTok's Terms of Service and Privacy Policy.
+
+= What TikTok layouts are available? =
+
+The free version includes a responsive Grid layout. The Pro version has Masonry and Carousel with autoplay, slide speed control, and navigation options.
 
 = Where can I get support? =
 
-For any queries, our support team is always open to hear from you. Contact our support forum [here](https://wpmanageninja.com/support-tickets/).
-
-## Third-Party Service Dependency
-
-Custom feed for TikTok relies on the TikTok Feed Display API provided by [TikTok](https://developers.tiktok.com/doc/display-api-overview/). The API is utilized for fetching TikTok feed data to display within the plugin.
-
-### Service Details:
-
-- Service Provider: [TikTok](https://developers.tiktok.com/doc/display-api-overview/)
-
-- Terms of Use: [TikTok Feed Display API Terms of Use](https://www.tiktok.com/legal/page/row/terms-of-service/en)
-
-- Privacy Policy: [TikTok Privacy Policy](https://www.tiktok.com/legal/page/row/privacy-policy/en)
-Additionally, this plugin utilizes a callback URL for authentication purposes. The callback URL is hosted on [wpsocialninja.com](https://wpsocialninja.com/) at [https://wpsocialninja.com/api/tiktok_callback](https://wpsocialninja.com/api/tiktok_callback).
-
-Please review the terms of use and privacy policy of TikTok to understand how your data may be handled when using the TikTok Feed Display API and ensure compliance with any legal requirements.
-
+[Submit a support ticket here](https://wpmanageninja.com/support-tickets/). Our team responds within 24 hours on business days.
 
 == Screenshots ==
 
-== Screenshots ==
-1. Grow your business with the power of Custom Feed for TikTok by WP Social Ninja
-2. Display your TikTok Feed with multiple layout types and make it fit with your brand
-3. Connect your multiple TikTok accounts to show your different products from different accounts
-4. Make a combined account feed with your multiple TikTok posts from multiple businesses
-5. Add variety to your website with multiple templates on your multiple web pages
-6. Decorate your TikTok feed with advanced template settings and make it look trendy and eye-catchy
-7. 100% Responsive on all devices
+1. Display your TikTok feed on any WordPress page with no coding required
+2. Multiple layout options like Grid, Masonry and Carousel, with advanced customization controls
+3. Connect multiple TikTok accounts to show your different products from different accounts
+4. Video popup lets visitors watch TikTok videos without leaving your site
+5. Control the style settings; colors, spacing, fonts, and borders from a visual settings panel
+6. Works with Elementor, Oxygen, and Beaver Builder page builders
+7. 100% responsive on desktop, tablet, and mobile devices
 
 == Changelog ==
+
+1.2.2
+- Optimized database queries and improved security
 
 1.2.1
 - Added device-based responsive control for ‘Load More’ behavior.
