@@ -13,6 +13,7 @@ use WPSocialReviews\App\Services\Platforms\ImageOptimizationHandler;
 use WPSocialReviews\App\Services\Platforms\PlatformData;
 use WPSocialReviews\Framework\Support\Arr;
 use WPSocialReviews\App\Services\Helper;
+use WPSocialReviews\App\Services\Platforms\RemoteAuth;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
@@ -28,8 +29,8 @@ class TiktokFeed extends BaseFeed
     protected $platfromData;
     private $remoteFetchUrl = 'https://open.tiktokapis.com/v2/';
     protected $cacheHandler;
-    private $client_key = 'aw4cddbhcvsbl34m';
-    private $client_secret = 'IV2QhJ7nxhvEthCI2QqZTTPpoNZOPZB6';
+    private $client_key = '';
+    private $client_secret = '';
     private $redirect_uri = 'https://wpsocialninja.com/api/tiktok_callback';
     private $postId = null;
     
@@ -285,60 +286,37 @@ class TiktokFeed extends BaseFeed
 
     public function refreshAccessToken($refreshTokenReceived, $userId)
     {
-        $api_url = $this->remoteFetchUrl . 'oauth/token/';
+        // Refresh through the wpsn-auth bridge — the TikTok client secret now lives only there.
+        $token = RemoteAuth::refreshAuth('tiktok', 'feed', $refreshTokenReceived);
 
-//        $settings = get_option('wpsr_tiktok_global_settings');
-//        $clientId = Arr::get($settings, 'app_settings.client_id', '');
-//        $clientSecret = Arr::get($settings, 'app_settings.client_secret', '');
-//
-//        $clientId = $this->protector->decrypt($clientId);
-//        $clientSecret = $this->protector->decrypt($clientSecret);
-
-        $args = array(
-            'body' => array(
-//                'client_key' => $clientId,
-//                'client_secret' => $clientSecret,
-                'client_key' => $this->client_key,
-                'client_secret' => $this->client_secret,
-                'refresh_token' => $refreshTokenReceived,
-                'grant_type' => 'refresh_token',
-            ),
-            'headers' => array(
-                'Content-Type' => 'application/x-www-form-urlencoded',
-                'Cache-Control' => 'no-cache',
-            ),
-        );
-
-        $response = wp_remote_post($api_url, $args);
-
-        if (is_wp_error($response)) {
-            return ['error_message' => $response->get_error_message()];
-        }
-
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-
-        if (isset($data['error_description'])) {
+        if (is_wp_error($token)) {
+            RemoteAuth::logRefreshFailure('tiktok', 'feed', $token);
             $errorData = [
-                'error_message' => $data['error_description'],
-                'error_code' => Arr::get($data, 'error'),
+                // Generic, safe-to-store reason + code — never the raw bridge/provider message.
+                'error_message' => $token->get_error_message(),
+                'error_code'    => $token->get_error_code(),
             ];
             $this->updateSourceList($userId, $errorData);
             return $errorData;
         }
 
-        if (isset($data['access_token']) && isset($data['open_id'])) {
+        if (!empty($token['access_token'])) {
+            // created_at is the bridge's clock; use it as the issued-at for expiry math.
+            $createdAt = (int) Arr::get($token, 'created_at', time());
+            $expiresIn = intval(Arr::get($token, 'expires_in', 0));
+
             $updateData = [
-                'access_token' => $this->protector->encrypt($data['access_token']),
-                'refresh_token' => $data['refresh_token'],
-                'expiration_time' => time() + intval($data['expires_in']),
-                'open_id' => $data['open_id'],
-                'error_message' => '', // Clear previous errors
-                'error_code' => '',
+                'access_token'    => $this->protector->encrypt($token['access_token']),
+                // TikTok ROTATES the refresh token — always persist the new one for next refresh.
+                'refresh_token'   => Arr::get($token, 'refresh_token', $refreshTokenReceived),
+                'expiration_time' => $createdAt + $expiresIn,
+                'open_id'         => Arr::get($token, 'open_id', $userId),
+                'error_message'   => '', // Clear previous errors
+                'error_code'      => '',
             ];
 
             $this->updateSourceList($userId, $updateData);
-            return $data['access_token'];
+            return $token['access_token'];
         }
 
         return ['error_message' => 'Invalid refresh response'];
