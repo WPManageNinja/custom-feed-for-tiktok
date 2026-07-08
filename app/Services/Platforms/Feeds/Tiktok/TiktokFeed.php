@@ -290,7 +290,6 @@ class TiktokFeed extends BaseFeed
         $token = RemoteAuth::refreshAuth('tiktok', 'feed', $refreshTokenReceived);
 
         if (is_wp_error($token)) {
-            RemoteAuth::logRefreshFailure('tiktok', 'feed', $token);
             $errorData = [
                 // Generic, safe-to-store reason + code — never the raw bridge/provider message.
                 'error_message' => $token->get_error_message(),
