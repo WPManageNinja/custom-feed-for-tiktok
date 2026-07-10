@@ -286,6 +286,11 @@ class TiktokFeed extends BaseFeed
 
     public function refreshAccessToken($refreshTokenReceived, $userId)
     {
+        // Older core lacks RemoteAuth; boot file already shows an update notice.
+        if (!class_exists(RemoteAuth::class)) {
+            return ['error_message' => 'Token refresh unavailable'];
+        }
+
         // Refresh through the wpsn-auth bridge — the TikTok client secret now lives only there.
         $token = RemoteAuth::refreshAuth('tiktok', 'feed', $refreshTokenReceived);
 

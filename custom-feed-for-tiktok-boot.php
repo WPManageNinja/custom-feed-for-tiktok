@@ -9,6 +9,7 @@ define('CUSTOM_FEED_FOR_TIKTOK_VERSION', '1.2.3');
 define('CUSTOM_FEED_FOR_TIKTOK', true);
 define('CUSTOM_FEED_FOR_TIKTOK_URL', plugin_dir_url(__FILE__));
 define('CUSTOM_FEED_FOR_TIKTOK_DIR', plugin_dir_path(__FILE__));
+define('CUSTOM_FEED_FOR_TIKTOK_MIN_WPSR_VERSION', '4.3.0');
 
 spl_autoload_register(function ($class){
     $match = 'CustomFeedForTiktok';
@@ -110,9 +111,34 @@ class CustomFeedForTiktokDependency
     }
 }
 
+class CustomFeedForTiktokOutdatedCoreNotice
+{
+    public function init()
+    {
+        add_action('admin_notices', function () {
+            $message = sprintf(
+                /* translators: 1: required WP Social Ninja version, 2: currently installed version */
+                __('Custom Feed for TikTok requires WP Social Ninja version %1$s or later. You have version %2$s installed. Please update WP Social Ninja to keep all features working correctly.', 'custom-feed-for-tiktok'),
+                CUSTOM_FEED_FOR_TIKTOK_MIN_WPSR_VERSION,
+                WPSOCIALREVIEWS_VERSION
+            );
+
+            printf(
+                '<div class="notice notice-error"><p>%s</p></div>',
+                esc_html($message)
+            );
+        });
+    }
+}
+
 add_action('init', function ($app) {
     if( !defined('WPSOCIALREVIEWS_VERSION') ){
         (new CustomFeedForTiktokDependency())->init();
+        return;
+    }
+
+    if (version_compare(WPSOCIALREVIEWS_VERSION, CUSTOM_FEED_FOR_TIKTOK_MIN_WPSR_VERSION, '<')) {
+        (new CustomFeedForTiktokOutdatedCoreNotice())->init();
     }
 });
 

@@ -31,6 +31,7 @@ This plugin is a **dependent extension** of WP Social Ninja. Always load the rel
 | `workflow-tiktok-feed.md` | Feed types (user/single video), multi-source aggregation, Config normalizer, formatData schema, pagination |
 | `workflow-tiktok-templates.md` | Template rendering pipeline (header/grid/footer), action hook elements, page builder integrations (Elementor, Oxygen, Beaver) |
 | `workflow-tiktok-bugfix.md` | TikTok-specific pitfalls, known bugs, security issues unique to this plugin |
+| `pr-description/SKILL.md` | Slash-invocable (`/pr-description`) — generates a PR description from the current branch's diff using this plugin's `.github/pull_request_template.md` |
 
 ## Quick Decision Guide
 
