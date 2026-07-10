@@ -13,6 +13,7 @@ use WPSocialReviews\App\Services\Platforms\ImageOptimizationHandler;
 use WPSocialReviews\App\Services\Platforms\PlatformData;
 use WPSocialReviews\Framework\Support\Arr;
 use WPSocialReviews\App\Services\Helper;
+use WPSocialReviews\App\Services\Platforms\RemoteAuth;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
@@ -21,13 +22,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 class TiktokFeed extends BaseFeed
 {
     public $platform = 'tiktok';
+    protected $authProvider = 'tiktok';
+    protected $authFlow = 'feed';
     public $feedData = [];
     protected $protector;
     protected $platfromData;
     private $remoteFetchUrl = 'https://open.tiktokapis.com/v2/';
     protected $cacheHandler;
-    private $client_key = 'aw4cddbhcvsbl34m';
-    private $client_secret = 'IV2QhJ7nxhvEthCI2QqZTTPpoNZOPZB6';
+    private $client_key = '';
+    private $client_secret = '';
     private $redirect_uri = 'https://wpsocialninja.com/api/tiktok_callback';
     private $postId = null;
     
@@ -113,73 +116,134 @@ class TiktokFeed extends BaseFeed
         $response = $this->getAccessToken($access_code);
 
         if (200 === wp_remote_retrieve_response_code($response)) {
-            $responseArr = json_decode(wp_remote_retrieve_body($response), true);
-            $access_token = Arr::get($responseArr, 'access_token');
-            $refresh_token = Arr::get($responseArr, 'refresh_token');
-            $refresh_expires_in = Arr::get($responseArr, 'refresh_expires_in');
-            $expires_in = intval(Arr::get($responseArr, 'expires_in'));
-            $open_id = Arr::get($responseArr, 'open_id');
-
-            $fetchUrl = $this->remoteFetchUrl . 'user/info/?fields=avatar_url,display_name,profile_deep_link';
-            $response = wp_remote_get($fetchUrl, [
-                'headers' => [
-                    'Authorization' => "Bearer " . $access_token,
-                    'Content-Type' => 'application/json'
-                ],
-            ]);
-
-            do_action( 'wpsocialreviews/tiktok_feed_api_connect_response', $response ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-
-            if (is_wp_error($response)) {
-                throw new \Exception($response->get_error_message()); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-            }
-
-            if (200 !== wp_remote_retrieve_response_code($response)) {
-                $errorMessage = $this->getErrorMessage($response);
-                throw new \Exception($errorMessage); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-            }
-
-            if(Arr::get($response, 'error.code') && (new PlatformData('tiktok'))->isAppPermissionError($response)){
-                do_action( 'wpsocialreviews/tiktok_feed_app_permission_revoked' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-            }
-
-            if (200 === wp_remote_retrieve_response_code($response)) {
-                $responseArr = json_decode(wp_remote_retrieve_body($response), true);
-                $name = Arr::get($responseArr, 'data.user.display_name');
-                $profile_url = Arr::get($responseArr, 'data.user.profile_deep_link');
-                $avatar = Arr::get($responseArr, 'data.user.avatar_url');
-
-                $data = [
-                    'display_name' => $name,
-                    'avatar_url' => $avatar,
-                    'profile_url' => $profile_url,
-                    'access_token' => $this->protector->encrypt($access_token),
-                    'refresh_token' => $refresh_token,
-                    'expiration_time' => time() + $expires_in,
-                    'refresh_expires_in' => $refresh_expires_in,
-                    'open_id' => $open_id,
-                    'error_message'  => '',
-                    'error_code'     => '',
-                    'has_app_permission_error'     => false,
-                    'has_critical_error'     => false,
-                    'encryption_error'     => false,
-                ];
-
-                $sourceList = $this->getConnectedSourceList();
-                $sourceList[$open_id] = $data;
-                $accountArgs = [
-                    'user_id' => $open_id,
-                    'username' => $open_id,
-                ];
-
-                $this->clearFeedCache($open_id);
-                $this->errorManager->removeErrors('connection', $accountArgs);
-                update_option('wpsr_tiktok_connected_sources_config', array('sources' => $sourceList));
-
-                // add global tiktok settings when user verified
-                $this->setGlobalSettings();
-            }
+            $token = json_decode(wp_remote_retrieve_body($response), true);
+            $this->persistTokenConfig($token);
         }
+    }
+
+    /**
+     * Verify a TikTok token, fetch the account profile and store it as a connected source.
+     *
+     * Shared by the legacy access-code flow (saveVerificationConfigs) and the remote auth
+     * bridge flow (persistAuthResult). The token array is the decoded TikTok oauth/token
+     * response: access_token, refresh_token, expires_in, refresh_expires_in, open_id.
+     *
+     * @param array $token
+     * @return array account metadata (open_id, display_name, username)
+     * @throws \Exception
+     */
+    protected function persistTokenConfig($token = [])
+    {
+        $access_token = Arr::get($token, 'access_token');
+        if (empty($access_token)) {
+            throw new \Exception(__('TikTok access token is missing.', 'custom-feed-for-tiktok')); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+        }
+
+        $refresh_token = Arr::get($token, 'refresh_token');
+        $refresh_expires_in = Arr::get($token, 'refresh_expires_in');
+        $expires_in = intval(Arr::get($token, 'expires_in'));
+        $open_id = Arr::get($token, 'open_id');
+
+        $fetchUrl = $this->remoteFetchUrl . 'user/info/?fields=avatar_url,display_name,profile_deep_link';
+        $response = wp_remote_get($fetchUrl, [
+            'headers' => [
+                'Authorization' => "Bearer " . $access_token,
+                'Content-Type' => 'application/json'
+            ],
+        ]);
+
+        do_action( 'wpsocialreviews/tiktok_feed_api_connect_response', $response ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+        if (is_wp_error($response)) {
+            throw new \Exception($response->get_error_message()); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+        }
+
+        if (200 !== wp_remote_retrieve_response_code($response)) {
+            $errorMessage = $this->getErrorMessage($response);
+            throw new \Exception($errorMessage); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+        }
+
+        if(Arr::get($response, 'error.code') && (new PlatformData('tiktok'))->isAppPermissionError($response)){
+            do_action( 'wpsocialreviews/tiktok_feed_app_permission_revoked' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+        }
+
+        $responseArr = json_decode(wp_remote_retrieve_body($response), true);
+        $name = Arr::get($responseArr, 'data.user.display_name');
+        $profile_url = Arr::get($responseArr, 'data.user.profile_deep_link');
+        $avatar = Arr::get($responseArr, 'data.user.avatar_url');
+
+        $data = [
+            'display_name' => $name,
+            'avatar_url' => $avatar,
+            'profile_url' => $profile_url,
+            'access_token' => $this->protector->encrypt($access_token),
+            'refresh_token' => $refresh_token,
+            'expiration_time' => time() + $expires_in,
+            'refresh_expires_in' => $refresh_expires_in,
+            'open_id' => $open_id,
+            'error_message'  => '',
+            'error_code'     => '',
+            'has_app_permission_error'     => false,
+            'has_critical_error'     => false,
+            'encryption_error'     => false,
+        ];
+
+        $sourceList = $this->getConnectedSourceList();
+        $sourceList[$open_id] = $data;
+        $accountArgs = [
+            'user_id' => $open_id,
+            'username' => $open_id,
+        ];
+
+        $this->clearFeedCache($open_id);
+        $this->errorManager->removeErrors('connection', $accountArgs);
+        update_option('wpsr_tiktok_connected_sources_config', array('sources' => $sourceList));
+
+        // add global tiktok settings when user verified
+        $this->setGlobalSettings();
+
+        return [
+            'open_id'      => $open_id,
+            'display_name' => $name,
+            'username'     => $open_id,
+        ];
+    }
+
+    /**
+     * Persist a token returned by the remote auth bridge.
+     *
+     * Called by BaseFeed::consumeAuth via RemoteAuth::consumeAuth after the bridge
+     * has completed OAuth and the plugin has decrypted/claimed the token.
+     *
+     * @param array $result
+     * @return array
+     * @throws \RuntimeException
+     */
+    protected function persistAuthResult($result)
+    {
+        if (!Arr::get($result, 'ok')) {
+            return $result;
+        }
+
+        $platform = Arr::get($result, 'platform', '');
+        if ($platform && $platform !== $this->platform) {
+            throw new \RuntimeException(__('Invalid auth platform response.', 'custom-feed-for-tiktok'));
+        }
+
+        $token = Arr::get($result, 'token', []);
+        $result['account']  = $this->persistTokenConfig($token);
+        $result['platform'] = $this->platform;
+
+        return $result;
+    }
+
+    protected function formatAuthResultForResponse($result)
+    {
+        return [
+            'ok'       => true,
+            'platform' => $this->platform,
+            'account'  => Arr::get($result, 'account', []),
+        ];
     }
 
     public function maybeRefreshToken($account)
@@ -222,60 +286,36 @@ class TiktokFeed extends BaseFeed
 
     public function refreshAccessToken($refreshTokenReceived, $userId)
     {
-        $api_url = $this->remoteFetchUrl . 'oauth/token/';
+        // Refresh through the wpsn-auth bridge — the TikTok client secret now lives only there.
+        $token = RemoteAuth::refreshAuth('tiktok', 'feed', $refreshTokenReceived);
 
-//        $settings = get_option('wpsr_tiktok_global_settings');
-//        $clientId = Arr::get($settings, 'app_settings.client_id', '');
-//        $clientSecret = Arr::get($settings, 'app_settings.client_secret', '');
-//
-//        $clientId = $this->protector->decrypt($clientId);
-//        $clientSecret = $this->protector->decrypt($clientSecret);
-
-        $args = array(
-            'body' => array(
-//                'client_key' => $clientId,
-//                'client_secret' => $clientSecret,
-                'client_key' => $this->client_key,
-                'client_secret' => $this->client_secret,
-                'refresh_token' => $refreshTokenReceived,
-                'grant_type' => 'refresh_token',
-            ),
-            'headers' => array(
-                'Content-Type' => 'application/x-www-form-urlencoded',
-                'Cache-Control' => 'no-cache',
-            ),
-        );
-
-        $response = wp_remote_post($api_url, $args);
-
-        if (is_wp_error($response)) {
-            return ['error_message' => $response->get_error_message()];
-        }
-
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-
-        if (isset($data['error_description'])) {
+        if (is_wp_error($token)) {
             $errorData = [
-                'error_message' => $data['error_description'],
-                'error_code' => Arr::get($data, 'error'),
+                // Generic, safe-to-store reason + code — never the raw bridge/provider message.
+                'error_message' => $token->get_error_message(),
+                'error_code'    => $token->get_error_code(),
             ];
             $this->updateSourceList($userId, $errorData);
             return $errorData;
         }
 
-        if (isset($data['access_token']) && isset($data['open_id'])) {
+        if (!empty($token['access_token'])) {
+            // created_at is the bridge's clock; use it as the issued-at for expiry math.
+            $createdAt = (int) Arr::get($token, 'created_at', time());
+            $expiresIn = intval(Arr::get($token, 'expires_in', 0));
+
             $updateData = [
-                'access_token' => $this->protector->encrypt($data['access_token']),
-                'refresh_token' => $data['refresh_token'],
-                'expiration_time' => time() + intval($data['expires_in']),
-                'open_id' => $data['open_id'],
-                'error_message' => '', // Clear previous errors
-                'error_code' => '',
+                'access_token'    => $this->protector->encrypt($token['access_token']),
+                // TikTok ROTATES the refresh token — always persist the new one for next refresh.
+                'refresh_token'   => Arr::get($token, 'refresh_token', $refreshTokenReceived),
+                'expiration_time' => $createdAt + $expiresIn,
+                'open_id'         => Arr::get($token, 'open_id', $userId),
+                'error_message'   => '', // Clear previous errors
+                'error_code'      => '',
             ];
 
             $this->updateSourceList($userId, $updateData);
-            return $data['access_token'];
+            return $token['access_token'];
         }
 
         return ['error_message' => 'Invalid refresh response'];
