@@ -227,7 +227,7 @@ class TiktokFeed extends BaseFeed
 
         $platform = Arr::get($result, 'platform', '');
         if ($platform && $platform !== $this->platform) {
-            throw new \RuntimeException(__('Invalid auth platform response.', 'custom-feed-for-tiktok'));
+            throw new \RuntimeException(__('Invalid auth platform response.', 'custom-feed-for-tiktok')); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
         }
 
         $token = Arr::get($result, 'token', []);
