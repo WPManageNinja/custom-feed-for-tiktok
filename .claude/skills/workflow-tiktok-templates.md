@@ -3,297 +3,337 @@
 Read this when working on TikTok feed rendering — the PHP template pipeline, action hook element system, page builder integrations, and popup/display modes.
 
 > **Prerequisite:** Read `wp-social-reviews/.claude/skills/workflow-templates.md` first. This skill documents TikTok-specific rendering behaviour only.
+>
+> **Adding a new template?** Use `wp-social-reviews/.claude/skills/add-tiktok-template.md` — it has the
+> full three-repo checklist. This file describes the pipeline a new template plugs into.
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `app/Hooks/Handlers/TiktokTemplateHandler.php` | Action callbacks for each template element |
+| `app/Hooks/Handlers/TiktokTemplateHandler.php` | Action callbacks for each template element + AJAX pagination |
 | `app/Hooks/Handlers/ShortcodeHandler.php` | Shortcode entry point → orchestrates full render |
-| `app/Views/public/feeds-templates/tiktok/header.php` | Account profile header (avatar, name, stats, follow button) |
-| `app/Views/public/feeds-templates/tiktok/template1.php` | Main feed grid — iterates video items |
-| `app/Views/public/feeds-templates/tiktok/footer.php` | Follow button (footer position) + load-more button |
-| `app/Views/public/feeds-templates/tiktok/elements/` | Individual element partials (7 files) |
-| `app/Services/Widgets/TikTokWidget.php` | Elementor widget definition |
+| `app/Hooks/actions.php` / `filters.php` | Authoritative hook registrations — check here, not this doc, if in doubt |
+| `app/Views/public/feeds-templates/tiktok/header.php` | Account profile header + **opens** the wrapper/row divs |
+| `app/Views/public/feeds-templates/tiktok/template1.php` | Free feed grid — iterates video items |
+| `app/Views/public/feeds-templates/tiktok/footer.php` | Follow button (footer position) + load-more + **closes** the wrapper |
+| `app/Views/public/feeds-templates/tiktok/elements/` | Element partials (7 files) |
+| `app/Services/Widgets/ElementorWidget.php` | Elementor bootstrap (registers the widget) |
+| `app/Services/Widgets/TikTokWidget.php` | Elementor widget class (`extends Widget_Base`) |
 | `app/Services/Widgets/Oxygen/OxygenWidget.php` | Oxygen Builder element |
 | `app/Services/Widgets/Beaver/BeaverWidget.php` | Beaver Builder module |
+
+**Pro templates (`template2`, `template3`, …) live in `wp-social-ninja-pro/app/Views/public/feeds-templates/tiktok/`,
+not in this plugin.** The Vue editor previews and all SCSS live in `wp-social-reviews` (core).
 
 ## Render Pipeline
 
 ```
-[wp_social_ninja id="X" platform="tiktok"] shortcode
+[wp_social_ninja id="X" platform="tiktok"]
   │
-  ▼
-apply_filters('wpsocialreviews/render_tiktok_template', '', $postId, $atts)
+  ▼  core ShortcodeHandler
+apply_filters('wpsocialreviews/render_tiktok_template', $templateId, $platform)   // 2 args
   │
-  ▼
-ShortcodeHandler::renderTiktokTemplate($html, $postId, $atts)
-  ├─ LiteSpeed cache tag clear (if LSCache active)
-  ├─ TiktokFeed::getTemplateMeta($settings, $postId) → full feed data
-  ├─ Config::formatTiktokConfig() → normalized settings
+  ▼  CustomFeedForTiktok\Application\Hooks\Handlers\ShortcodeHandler::renderTiktokTemplate($templateId, $platform)
+  ├─ LiteSpeed: do_action('litespeed_tag_add', 'wpsn_purge_tiktok')   if defined('LSCWP_V')
+  ├─ $shortcodeHandler = new \WPSocialReviews\App\Hooks\Handlers\ShortcodeHandler()   // core does the heavy lifting
+  ├─ $template_meta = $shortcodeHandler->templateMeta($templateId, $platform)
+  ├─ do_action('wpsocialreviews/before_display_tiktok_feed', $account_ids)   // core >= 3.14.0
+  ├─ $feed     = (new TiktokFeed())->getTemplateMeta($template_meta, $templateId)
+  ├─ $settings = $shortcodeHandler->formatFeedSettings($feed)
+  ├─ do_action('wp_social_review_loading_layout_' . $layout, $templateId, $settings)
+  ├─ $pagination_settings = $shortcodeHandler->formatPaginationSettings($feed)
   │
-  ├─ [popup mode check]
-  │   if display_mode === 'popup':
-  │     makePopupModal($feeds, $settings)
-  │     enqueuePopupScripts()
+  ├─ [popup mode] if post_settings.display_mode === 'popup':
+  │      $shortcodeHandler->makePopupModal($feeds, $header, $feed_settings, $templateId, $platform)
+  │      $shortcodeHandler->enqueuePopupScripts()
   │
-  ├─ enqueue assets (if not already enqueued)
-  ├─ Build $errorHtml if PlatformErrorManager has errors
+  ├─ $image_settings ← wpsr_tiktok_global_settings.optimized_images + advance_settings.has_gdpr
+  ├─ wp_enqueue_script('wpsr-image-resizer')   if optimization on and resize data incomplete
+  ├─ $shortcodeHandler->enqueueScripts()
+  ├─ do_action('wpsocialreviews/load_template_assets', $templateId)   // Pro prints the custom style block here
+  ├─ error banner ← apply_filters('wpsocialreviews/display_frontend_error_message', …)
   │
-  ├─ ob_start()
-  │   include header.php     ─── account profile section
-  │   include template1.php  ─── video items grid/carousel
-  │   include footer.php     ─── follow button + load-more
-  └─ return ob_get_clean()
+  ├─ $html .= loadView('public/feeds-templates/tiktok/header', …)
+  ├─ if (defined('WPSOCIALREVIEWS_PRO') && $template !== 'template1')
+  │      $html .= apply_filters('custom_feed_for_tiktok/add_tiktok_feed_template', $template_body_data)
+  │  else $html .= loadView('public/feeds-templates/tiktok/template1', $template_body_data)
+  ├─ $html .= loadView('public/feeds-templates/tiktok/footer', …)
+  └─ return $html
 ```
+
+**No output buffering.** The handler concatenates `loadView()` return values into `$html`. Don't add
+`ob_start()`/`include` — `loadView()` (`app/Traits/LoadView.php`) already returns a string.
+
+`header.php` opens the wrapper, `.wpsr-container`, `.wpsr-tiktok-feed-wrapper-inner` and the
+`.wpsr-row`/`.swiper-wrapper` div; `footer.php` closes them. A template view emits **only** the items —
+which is why one unbalanced `</div>` in a template breaks the whole page layout.
 
 ## Action Hook Architecture
 
-Every template element is rendered via WordPress action hooks — **not inline PHP**. This allows Pro to override or extend any element without forking template files.
+Every template element renders via action hooks — **not inline PHP** — so Pro can extend any element
+without forking template files. Arg counts are exactly as registered in `app/Hooks/actions.php`:
 
-```
-template1.php iterates $feeds:
-  │
-  ├─ do_action('custom_feed_for_tiktok/tiktok_feed_template_item_wrapper_before', $feed, $meta)
-  │   → TiktokTemplateHandler::renderTemplateItemWrapper($meta)
-  │   → Outputs: <div class="wpsr-col-X wpsr-tiktok-feed-item ...">
-  │
-  ├─ do_action('custom_feed_for_tiktok/tiktok_feed_media', $feed, $meta)
-  │   → TiktokTemplateHandler::renderFeedMedia($feed, $meta)
-  │   → Outputs: elements/media.php (video preview image)
-  │
-  ├─ do_action('custom_feed_for_tiktok/tiktok_feed_author', $feed, $meta)
-  │   → TiktokTemplateHandler::renderFeedAuthor($feed, $meta)
-  │   → Outputs: elements/author.php (avatar + username)
-  │
-  ├─ do_action('custom_feed_for_tiktok/tiktok_feed_author_name', $feed, $meta)
-  │   → TiktokTemplateHandler::renderFeedAuthorName($feed, $meta)
-  │   → Outputs: elements/author-name.php (name only, for hover overlay)
-  │
-  ├─ do_action('custom_feed_for_tiktok/tiktok_feed_description', $feed, $meta)
-  │   → TiktokTemplateHandler::renderFeedDescription($feed, $meta)
-  │   → Outputs: elements/description.php (caption text, truncated)
-  │
-  ├─ do_action('custom_feed_for_tiktok/tiktok_feed_icon', $class, $meta)
-  │   → TiktokTemplateHandler::renderFeedIcon($class, $meta)
-  │   → Outputs: elements/icon.php (TikTok logo icon)
-  │
-  └─ do_action('custom_feed_for_tiktok/load_more_tiktok_button', $meta)
-      → TiktokTemplateHandler::renderLoadMoreButton($meta)
-      → Outputs: elements/load-more.php (AJAX button)
-```
+| Hook (`custom_feed_for_tiktok/…`) | Handler | Args | Output |
+|---|---|---|---|
+| `tiktok_feed_template_item_wrapper_before` | `TiktokTemplateHandler@renderTemplateItemWrapper` | **1** (`$template_meta`) | opening column `<div>` (you close it) |
+| `tiktok_feed_media` | `@renderFeedMedia` | 2 (`$feed`, `$template_meta`) | `elements/media.php` |
+| `tiktok_feed_author` | `@renderFeedAuthor` | 2 | `elements/author.php` (avatar + name + date) |
+| `tiktok_feed_author_name` | `@renderFeedAuthorName` | 2 | `elements/author-name.php` |
+| `tiktok_feed_description` | `@renderFeedDescription` | 2 | `elements/description.php` |
+| `tiktok_feed_icon` | `@renderFeedIcon` | **1** (`$class`) | `elements/icon.php` |
+| `load_more_tiktok_button` | `@renderLoadMoreButton` | **7** | `elements/load-more.php` |
 
-**To override an element (Pro or custom):**
+Registered by **Pro** (`wp-social-ninja-pro/app/Hooks/actions.php`) — these silently no-op without Pro:
+
+| Hook (`custom_feed_for_tiktok/…`) | Handler | Args |
+|---|---|---|
+| `tiktok_feed_statistics` | `TiktokTemplateHandlerPro@renderTiktokFeedStatistics` | 2 (`$template_meta`, `$feed`) |
+| `tiktok_feed_date` | `@renderFeedDate` | 2 (`$template_meta`, `$feed`) |
+| `tiktok_header_statistics` | `@renderTiktokHeaderStatistics` | 3 |
+| `tiktok_feed_bio_description` | `@renderTiktokFeedBioDescription` | 2 |
+| `tiktok_follow_button` | `@renderTiktokFollowButtonHtml` | 2 |
+
+Note the two per-item Pro hooks take **`$template_meta` first**, the opposite of the free element hooks.
+
+**To override an element** — the namespace segment is `Application`, not `App`:
 ```php
-// Remove default handler
 remove_action('custom_feed_for_tiktok/tiktok_feed_media',
-    [\CustomFeedForTiktok\App\Hooks\Handlers\TiktokTemplateHandler::class, 'renderFeedMedia'], 10);
+    [\CustomFeedForTiktok\Application\Hooks\Handlers\TiktokTemplateHandler::class, 'renderFeedMedia'], 10);
 
-// Add custom handler
-add_action('custom_feed_for_tiktok/tiktok_feed_media', function($feed, $meta) {
-    // Custom output
+add_action('custom_feed_for_tiktok/tiktok_feed_media', function ($feed, $meta) {
+    // custom output
 }, 10, 2);
 ```
 
-## Template Variables Available in PHP Files
+## Variables Available in Template Files
 
-All template files receive these local variables:
+Each view receives a **different** set — they are not interchangeable.
 
-| Variable | Type | Content |
-|----------|------|---------|
-| `$template_meta` | array | Full `Config::formatTiktokConfig()` output |
-| `$feeds` | array | Array of `formatData()` video items |
-| `$account_details` | array | User info: name, avatar, stats, profile_url |
-| `$error_html` | string | Error banner HTML or empty string |
-| `$sinceId` | int | Start index for current page (pagination) |
-| `$maxId` | int | End index for current page |
-| `$postId` | int | Template post ID |
+**Template views** (`template1.php`, Pro `templateN.php`), from `$template_body_data`:
 
-Access nested settings via:
+| Variable | Content |
+|---|---|
+| `$templateId` | template post ID |
+| `$feeds` | `$settings['feeds']` — all items, unpaginated |
+| `$template_meta` | the `feed_settings` array (see below) |
+| `$paginate` | items per page |
+| `$sinceId` / `$maxId` | inclusive index range for the current page — **honour both** |
+| `$pagination_settings` | full pagination config |
+| `$translations` | `GlobalSettings::getTranslations()` |
+| `$image_settings` | `['optimized_images' => 'true'\|'false', 'has_gdpr' => 'true'\|'false']` |
+
+**`header.php`:** `$templateId`, `$template`, `$header`, `$feed_settings`, `$layout_type`, `$column_gaps`, `$translations`
+**`footer.php`:** `$templateId`, `$feeds`, `$feed_settings`, `$layout_type`, `$column_gaps`, `$paginate`, `$pagination_type`, `$header`, `$total`
+
+Inside `$template_meta`:
 ```php
-$feedSettings  = $template_meta['feed_settings'];
-$postSettings  = $feedSettings['post_settings'];
-$headerSettings = $feedSettings['header_settings'];
-$popupSettings = $feedSettings['popup_settings'];
-$carouselSettings = $feedSettings['carousel_settings'];
+$template_meta['post_settings']      // display_mode, resolution, display_* toggles, content_length
+$template_meta['source_settings']    // feed_type, selected_accounts, feed_count
+$template_meta['header_settings']    // display_header, display_profile_photo, counters
+$template_meta['carousel_settings']  // autoplay, autoplay_speed, responsive_slides_*, navigation
+$template_meta['popup_settings']     // display_sidebar, display_video, display_caption, …
+$template_meta['layout_type']        // grid | masonry | carousel
+$template_meta['responsive_column_number']  // ['desktop','tablet','mobile']
+$template_meta['column_gaps']        // default | no_gap | narrow | small | wide | wider
+```
+
+Always guard the page range in the item loop:
+```php
+foreach ($feeds as $wpsr_tiktok_index => $wpsr_tiktok_feed) {
+    if ($wpsr_tiktok_index >= $sinceId && $wpsr_tiktok_index <= $maxId) { … }
+}
 ```
 
 ## Display Modes
 
-Each video item renders differently based on `post_settings.display_mode`:
+Set by `post_settings.display_mode`:
 
-| Mode | `display_mode` value | Behaviour |
-|------|---------------------|-----------|
-| Open in TikTok | `'tiktok'` | Clicking image opens `https://www.tiktok.com/@{username}/video/{id}` |
-| Popup lightbox | `'popup'` | Clicking image opens inline popup with video player |
-| No link | `'none'` | Static image, not clickable |
+| Mode | Value | Behaviour |
+|---|---|---|
+| Open in TikTok | `'tiktok'` | media wrapped in `<a href="https://www.tiktok.com/@{username}/video/{id}" target="_blank">` |
+| Popup lightbox | `'popup'` | JS intercepts the click and opens the shared modal |
+| No link | `'none'` | static image, not clickable |
 
-**Popup mode** requires extra setup:
-```php
-// In ShortcodeHandler::renderTiktokTemplate():
-if ($displayMode === 'popup') {
-    $this->makePopupModal($feeds, $settings);  // Renders hidden popup HTML
-    $this->enqueuePopupScripts();              // Enqueues popup JS
-}
+**Popup is click-delegated, not attribute-addressed.** Core's `resources/public/social-ninja-modal.js` binds:
+```js
+$(document).on('click', '.wpsr-tiktok-feed-playmode, .wpsr-tiktok-feed-video-playmode, .wpsr-tiktok-icon-position',
+    function (e) { TiktokPopup.init(e, this); });
 ```
+`TiktokPopup.checkTiktokFeedType()` then reads, **off the clicked element itself**: `data-playmode`,
+`data-index`, `data-template-id`, `data-feed_type`, `data-optimized_images`, `data-has_gdpr`,
+`data-image_size` — and looks the item up in `window.WPSR_TiktokFrontEndJson[templateId][index]`.
 
-The popup modal HTML is output **once** per widget (not per item). Each item's `media.php` wraps the image in a `data-tiktok-popup-id="{id}"` link that JS uses to open the correct popup.
+Consequences:
+- Whatever element carries a playmode class **must also carry those `data-*` attributes**, or the popup opens empty.
+- `elements/media.php` renders `<a href="{video url}">` whenever `display_mode !== 'none'` — popup mode
+  included — and puts no `data-*` on it. For a card whose whole surface is clickable, inline the media
+  instead of using the hook: anchor only for `'tiktok'`, otherwise a `div` carrying the data attrs. See
+  Pro's `tiktok/template2.php` / `template3.php`.
+- The modal markup is emitted **once per widget** by core's `makePopupModal()`, not per item.
+
+There is no `data-tiktok-popup-id` attribute anywhere in the codebase.
 
 ## Column Layout (Grid)
 
-Grid columns are controlled by `responsive_column_number`:
-```php
-$columns = $feedSettings['responsive_column_number'];
-// ['desktop' => 4, 'tablet' => 6, 'mobile' => 12]
-// Bootstrap-style: desktop=4 means col-3 (12/4), tablet=6 means col-6, mobile=12 means col-12
-```
+`responsive_column_number` values are **Bootstrap-style spans out of 12**, used verbatim in the class
+name — they are not a column count:
 
-`renderTemplateItemWrapper()` outputs:
+```php
+['desktop' => '4', 'tablet' => '6', 'mobile' => '12']   // defaults
+// '3' → wpsr-col-3  → 4 across       '4'  → wpsr-col-4  → 3 across
+// '6' → wpsr-col-6  → 2 across       '12' → wpsr-col-12 → 1 across
+```
+The editor's "Number of Columns" dropdown stores the span — its "4 Column" option has `value: '3'`.
+
+`renderTemplateItemWrapper()` outputs (note `sm`/`xs`, and that desktop comes first):
 ```html
-<div class="wpsr-col-{mobile} wpsr-col-md-{tablet} wpsr-col-lg-{desktop} wpsr-tiktok-feed-item">
+<div class="wpsr-mb-30 wpsr-col-{desktop} wpsr-col-sm-{tablet} wpsr-col-xs-{mobile}">
 ```
 
-**Carousel mode** bypasses the grid wrapper — `item-parent-wrapper.php` outputs a different structure that the JS carousel library uses. Check `layout_type === 'carousel'` in template1.php before assuming grid markup.
+**Carousel mode** skips the wrapper hook entirely — items get `swiper-slide`, and `header.php` emits
+`.swiper-wrapper` in place of `.wpsr-row`. Guard with `layout_type !== 'carousel'` around both the
+wrapper hook call *and* its closing `</div>`.
 
-## Video Media Rendering (elements/media.php)
+## Video Media Rendering (`elements/media.php`)
 
 ```php
-// Determines image URL (optimized local vs TikTok CDN)
-$mediaUrl = $meta['image_optimization_enabled']
-    ? ($feed['media']['local_url'] ?? $feed['media']['url'])
-    : $feed['media']['url'];
+$wpsr_tiktok_media_url     = Arr::get($feed, 'media_url', '');                   // local/optimized copy
+$wpsr_tiktok_default_media = Arr::get($feed, 'media.preview_image_url', '');     // TikTok CDN
+$wpsr_tiktok_image_optimization = Arr::get($image_settings, 'optimized_images'); // 'true' | 'false'
 
-// Determines placeholder vs live image (GDPR loading)
-$isPlaceholder = strpos($mediaUrl, 'placeholder') !== false;
-// (str_contains() was fixed to strpos() for PHP 7.4 compat — PR #4)
+// which URL is used
+src = $wpsr_tiktok_image_optimization === 'true' ? $wpsr_tiktok_media_url : $wpsr_tiktok_default_media;
 
-// Link wrapper based on display_mode
-if ($display_mode === 'popup') {
-    // <a href="#" data-tiktok-popup-id="{id}">
-} elseif ($display_mode === 'tiktok') {
-    // <a href="https://www.tiktok.com/@{username}/video/{id}" target="_blank">
-} else {
-    // <div class="wpsr-tiktok-media-wrap">  (no link)
+// placeholder detection drives the show/hide + skeleton classes
+$wpsr_tiktok_img_class = !empty($media_url) && strpos($media_url, 'placeholder') === false
+    ? 'wpsr-tt-post-img wpsr-show' : 'wpsr-tt-post-img wpsr-hide';
+$wpsr_tiktok_animation_img_class = $media_url && strpos($media_url, 'placeholder') !== false
+    ? 'wpsr-animated-background' : '';
+```
+
+- The keys are `$feed['media_url']` and `$feed['media']['preview_image_url']`. There is no
+  `$feed['media']['local_url']` and no `$meta['image_optimization_enabled']`.
+- Use `strpos(...) === false`, not `str_contains()` — this plugin targets PHP 7.4. (Pro's own views do use
+  `str_contains`; that's a pre-existing inconsistency there, not a pattern to copy here.)
+- `post_settings.resolution` (`full`/`medium`/`low`) selects which locally-resized file is requested and is
+  passed through as `data-image_size` for the popup. No `srcset` is generated.
+
+## Asset Enqueueing
+
+**Assets are owned by the core plugin, not this one.** Core `ShortcodeHandler` registers:
+```php
+wp_register_style('wp_social_ninja_tt',
+    WPSOCIALREVIEWS_URL . 'assets/css/wp_social_ninja_tt.css', [], WPSOCIALREVIEWS_VERSION);
+```
+and `enqueueStyles()` maps `tiktok => tt` onto that handle. The stylesheet is compiled from
+`wp-social-reviews/resources/scss/public/tt.scss`.
+
+JS is the single shared bundle — there is no TikTok-specific script:
+```php
+$shortcodeHandler->enqueueScripts();   // wp_enqueue_script('wp-social-review')
+```
+Frontend data arrives as `window.wpsr_ajax_params`, injected inline before the `wp-social-review` tag
+(`addFrontendVarsBeforeScript()`); per-template feed JSON is `window.WPSR_TiktokFrontEndJson[templateId]`.
+
+Handle `wp_social_ninja_tt` is referenced by the Oxygen and Beaver widgets — don't rename it.
+There is no `tiktok-feed.css`, no `tiktok-feed.js`, and no `wpsrTiktokVars`.
+
+## Pro Template Registration
+
+Pro registers, gated on this plugin being active (`wp-social-ninja-pro/app/Hooks/filters.php`):
+```php
+if (defined('CUSTOM_FEED_FOR_TIKTOK_VERSION')) {
+    $app->addFilter('custom_feed_for_tiktok/add_tiktok_feed_template',
+        'WPSocialReviewsPro\App\Hooks\Handlers\TiktokTemplateHandlerPro@addTemplate');
+}
+```
+The filter takes **one argument** (`$template_body_data`) and returns rendered HTML. `addTemplate()`
+resolves the view from `template_meta.template` against an allow-list:
+```php
+public function addTemplate($data = [])
+{
+    $template = Arr::get($data, 'template_meta.template', 'template2');
+    $templates = ['template2', 'template3'];
+    if (!in_array($template, $templates, true)) { $template = 'template2'; }
+    return $this->loadView('feeds-templates/tiktok/' . $template, $data);
 }
 ```
 
-**Resolution setting:**
+**Two independent routing paths — keep them in sync:**
+1. `ShortcodeHandler::renderTiktokTemplate()` — initial render
+2. `TiktokTemplateHandler::getPaginatedFeedHtml()` — load-more / paged output, via the
+   `wpsocialreviews/get_paginated_feed_html` filter
+
+Both must use the same condition:
 ```php
-'resolution' => 'full'|'medium'|'low'
-// Controls: img width attribute and srcset generation
-// Only applies when image optimization is enabled (local images)
-// CDN images always serve TikTok's default resolution
+if (defined('WPSOCIALREVIEWS_PRO') && $template !== 'template1') { … Pro filter … }
 ```
+`getPaginatedFeedHtml()` previously hardcoded `$templateNumber === 'template2'`, which silently rendered
+**template1 markup on page 2+** of every other Pro template. Always test page 2, not just page 1.
+
+`header.php` already emits `'wpsr-tiktok-feed-' . $template`, so a new template's wrapper class appears
+with no change there.
+
+## Debugging Rendering Issues
+
+1. **Feed renders blank without error:**
+   - Check the GDPR + image optimization compound requirement (see `workflow-tiktok-feed.md`)
+   - Check the error banner — inspect source for `wpsr-error`
+   - Check `$feeds` is non-empty *and* that `$sinceId`/`$maxId` actually overlap it
+
+2. **Grid columns wrong:**
+   - Check `responsive_column_number` in the `_wpsr_template_config` post meta. The value is the **span**:
+     `3` → `wpsr-col-3` → 4 across. A value of `4` gives 3 across, not 4.
+   - Confirm `wp_social_ninja_tt` is enqueued (core owns it)
+
+3. **Carousel not initializing:**
+   - Check `layout_type === 'carousel'` — the wrapper is `.swiper-wrapper`/`swiper-slide`, not `.wpsr-row`
+   - Check `carousel_settings.autoplay_speed` is an integer, not a string
+
+4. **Popup opens empty, or navigates away instead of opening:**
+   - The clicked element needs both a playmode class *and* the full `data-*` set (see Display Modes)
+   - Check `window.WPSR_TiktokFrontEndJson[templateId][index]` exists for that index
+   - Check no overlay above the media has `pointer-events: auto` on a link — it will win the click
+
+5. **Author name not showing independently of photo:**
+   - Known bug (PR #6): `Config.php` read `display_author_name` from the `display_author_photo` key.
+     Verify `$settings['post_settings']['display_author_name']` reads its own key.
+
+6. **Load-more shows previously seen items:**
+   - `$sinceId = ($page - 1) * $paginate`, `$maxId = $sinceId + $paginate - 1`
+   - Confirm the JS increments the page counter before sending the request
+
+7. **Page 2 renders a different template** → see "Two independent routing paths" above.
 
 ## Page Builder Integrations
 
 ### Elementor
 
-**File:** `app/Services/Widgets/TikTokWidget.php`
+**Bootstrap:** `app/Services/Widgets/ElementorWidget.php`, instantiated from `actions.php` when
+`defined('ELEMENTOR_VERSION')`. **Widget class:** `app/Services/Widgets/TikTokWidget.php`
+(`extends Elementor\Widget_Base`).
 
-- Extends `Elementor\Widget_Base`
-- Registered via `elementor/widgets/register` action
-- Widget category: `wp-social-ninja` (registered by core plugin)
-- Controls: dropdown of available TikTok templates (fetched via `Helper::getConnectedSourceList()`)
-- Renders: `echo do_shortcode('[wp_social_ninja id="' . $templateId . '" platform="tiktok"]')`
-- Depends on stylesheet handle: `wp_social_ninja_tt`
+- Widget category: `wp-social-ninja` (registered by the core plugin)
+- Controls: dropdown of available TikTok templates
+- Renders via `do_shortcode('[wp_social_ninja id="…" platform="tiktok"]')`
+- Style dependency: `wp_social_ninja_tt`
 
-**Debugging Elementor:**
-- Widget not appearing in panel → check `defined('ELEMENTOR_VERSION')` in `actions.php`
-- Widget renders blank in editor → Elementor editor mode is excluded from template rendering in `ShortcodeHandler` (same pattern as core plugin — check for `\Elementor\Plugin::$instance->editor->is_edit_mode()`)
+**Debugging:** widget missing from the panel → check `defined('ELEMENTOR_VERSION')` in `actions.php`.
+Blank in the editor → editor mode is excluded from template rendering (check
+`\Elementor\Plugin::$instance->editor->is_edit_mode()`).
 
 ### Oxygen Builder
 
-**File:** `app/Services/Widgets/Oxygen/OxygenWidget.php`
+**File:** `app/Services/Widgets/Oxygen/OxygenWidget.php` (plus `Oxygen/TikTokWidget.php`).
 
-- Checks `class_exists('OxyEl')` before registering
-- Falls back to shortcode if element fails: `[wp_social_ninja id="..." platform="tiktok"]`
-- **Fixed bug (PR #7):** Fallback used `[wp_ social_ninja ...]` (space in tag). Now correct.
-
-**Debugging Oxygen:**
-- Element not rendering → check `class_exists('OxyEl')` at activation time
-- Fallback shortcode must use `[wp_social_ninja]` (no space) — if you see a space, this is the unfixed version
+- Registered only if `class_exists('OxyEl')`
+- Falls back to `[wp_social_ninja id="…" platform="tiktok"]`
+- **Fixed bug (PR #7):** the fallback had a space — `[wp_ social_ninja …]`. If you see a space, that fix is missing.
 
 ### Beaver Builder
 
-**File:** `app/Services/Widgets/Beaver/BeaverWidget.php` and `Beaver/TikTok/`
+**File:** `app/Services/Widgets/Beaver/BeaverWidget.php` and `Beaver/TikTok/`.
 
-- Extends `FLBuilderModule`
-- Registered via `fl_builder_register_module`
-- Frontend template: `Beaver/TikTok/includes/frontend.php`
-- Stylesheet: `Beaver/TikTok/includes/frontend.css.php`
-- Module settings: dropdown of TikTok templates
-
-## Asset Enqueueing
-
-Assets are enqueued in `ShortcodeHandler` when a TikTok widget is present on the page:
-
-```php
-wp_enqueue_style('wp_social_ninja_tt',
-    CUSTOM_FEED_FOR_TIKTOK_URL . 'assets/css/tiktok-feed.css',
-    [], CUSTOM_FEED_FOR_TIKTOK_VERSION);
-
-wp_enqueue_script('wp_social_ninja_tt',
-    CUSTOM_FEED_FOR_TIKTOK_URL . 'assets/js/tiktok-feed.js',
-    ['jquery'], CUSTOM_FEED_FOR_TIKTOK_VERSION, true);
-
-wp_localize_script('wp_social_ninja_tt', 'wpsrTiktokVars', [
-    'ajaxUrl'    => admin_url('admin-ajax.php'),
-    'nonce'      => wp_create_nonce('wpsr_tiktok_nonce'),
-    'postId'     => $postId,
-    'feedType'   => $feedType,
-    'pagination' => $paginationSettings,
-]);
-```
-
-**Handle name `wp_social_ninja_tt`** — this is the handle used in Elementor widget dependency. Don't rename it without updating `TikTokWidget.php`.
-
-## Adding a New Template Style (Pro)
-
-The free plugin has `template1`. Pro templates hook in via:
-
-```php
-// In Pro plugin:
-add_filter('custom_feed_for_tiktok/add_tiktok_feed_template', function($html, $templateId, $page, $settings) {
-    if ($settings['feed_settings']['template'] !== 'template2') return $html;
-
-    ob_start();
-    include PRO_PLUGIN_DIR . 'views/tiktok/template2.php';
-    return ob_get_clean();
-}, 10, 4);
-```
-
-The filter fires in `getPaginatedFeedHtml()` and (check) in initial render. If filter returns non-empty string, the free template1 is skipped.
-
-**Template selection** in `Config.php`:
-```php
-'template' => $settings['feed_settings']['template'] ?? 'template1',
-// Values: 'template1' (free), 'template2', 'template3' (Pro)
-```
-
-## Debugging Rendering Issues
-
-1. **Feed renders blank without error:**
-   - Check GDPR + image optimization compound requirement (see `workflow-tiktok-feed.md`)
-   - Check `$error_html` — is there a hidden error? Inspect HTML source for `wpsr-error` class
-   - Check `$feeds` is non-empty before reaching template files
-
-2. **Grid columns wrong:**
-   - Check `responsive_column_number` in `_wpsr_template_config` post meta
-   - Bootstrap-style: value of 4 = Bootstrap col-3 (12/4 = 3 columns). Verify CSS is loaded.
-
-3. **Carousel not initializing:**
-   - Check `wp_social_ninja_tt` JS is enqueued (`wp_scripts()->queue`)
-   - Check `layout_type === 'carousel'` in config — grid wrapper is different
-   - Check `carousel_settings.autoplay_speed` is integer (not string)
-
-4. **Author name not showing independently of photo:**
-   - **This was a known bug (PR #6).** `Config.php:63` read `display_author_name` from `display_author_photo` key. Fixed — verify the fix is deployed. Check: `$settings['post_settings']['display_author_name']` reads from `display_author_name` (not `display_author_photo`).
-
-5. **Elementor widget not in widget panel:**
-   - Verify Elementor loaded before TikTok plugin: `did_action('elementor/loaded')` should be true
-   - Check `ElementorWidget.php` bootstrap fires on `elementor/widgets/register`
-
-6. **Load-more shows previously seen items:**
-   - `$sinceId = $page * $perPage` — if `$page` starts at 0, first load-more should be `$page = 1`
-   - Check AJAX handler increments page counter correctly in JS before sending request
+- `extends FLBuilderModule`, registered via `fl_builder_register_module` when `class_exists('FLBuilder')`
+- Frontend template: `Beaver/TikTok/includes/frontend.php`; CSS: `includes/frontend.css.php`
