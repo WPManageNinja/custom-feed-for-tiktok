@@ -127,7 +127,7 @@ class TiktokTemplateHandler
             'image_settings' => $gdpr_settings
         ];
 
-        if ($templateNumber === 'template2') {
+        if (defined('WPSOCIALREVIEWS_PRO') && $templateNumber !== 'template1') {
             $html = apply_filters('custom_feed_for_tiktok/add_tiktok_feed_template', $template_body_data); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
             return $html;
         } else {
