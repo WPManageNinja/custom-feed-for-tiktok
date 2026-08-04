@@ -16,4 +16,24 @@ class Helper
         $sourceList = Arr::get($configs, 'sources') ? $configs['sources'] : [];
         return $sourceList;
     }
+
+    /**
+     *
+     * Resolve the header layout CSS class from the feed settings.
+     * 'classic' keeps the original header, 'minimal' renders the flat header.
+     *
+     * @param $feed_settings
+     *
+     * @return string
+     *
+     **/
+    public static function getHeaderLayoutClass($feed_settings = [])
+    {
+        $layout = Arr::get($feed_settings, 'header_settings.header_layout', 'classic');
+        if (!in_array($layout, array('classic', 'minimal'), true)) {
+            $layout = 'classic';
+        }
+
+        return 'wpsr-tiktok-feed-header-layout-' . $layout;
+    }
 }

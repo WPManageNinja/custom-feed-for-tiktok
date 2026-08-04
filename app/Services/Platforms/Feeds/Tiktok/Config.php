@@ -28,6 +28,11 @@ class Config
             $selectedAccounts = Arr::get($settings, 'source_settings.account_ids', [0 => $firstKey]);
         }
 
+        $header_layout = Arr::get($settings, 'header_settings.header_layout', 'classic');
+        if (!in_array($header_layout, array('classic', 'minimal'), true)) {
+            $header_layout = 'classic';
+        }
+
         return array(
             'feed_settings' => array(
                 'platform'                  => 'tiktok',
@@ -73,6 +78,7 @@ class Config
                 ),
                 'header_settings' => array(
                     'display_header'             => Arr::get($settings,'header_settings.display_header', 'true'),
+                    'header_layout'              => $header_layout,
                     'account_to_show'            => Arr::get($settings,'header_settings.account_to_show', $firstKey),
                     'display_profile_photo'      => Arr::get($settings,'header_settings.display_profile_photo', 'true'),
                     'display_page_name'          => Arr::get($settings,'header_settings.display_page_name', 'true'),
@@ -133,6 +139,27 @@ class Config
             'header' => array(
                 'title' => __('Header', 'custom-feed-for-tiktok'),
                 'key'  => 'header',
+                array(
+                    'title'     => __('Profile Photo', 'custom-feed-for-tiktok'),
+                    'key'      => 'profile_photo',
+                    'divider' => true,
+                    'typography' => false,
+                    'padding' => false,
+                    'border' => false,
+                    'condition' => array(
+                        'key' => 'header_settings.header_layout',
+                        'selector'  => 'minimal',
+                    ),
+                    'styles' => array(
+                        array(
+                            'title'      => __('Border Color:', 'custom-feed-for-tiktok'),
+                            'fieldKey'  => 'border_color',
+                            'type'      => 'color_picker',
+                            'flex'      => true,
+                            'disabled' => !$has_pro,
+                        )
+                    )
+                ),
                 array(
                     'title'     => __('User Name', 'custom-feed-for-tiktok'),
                     'key'      => 'user_name',
@@ -504,6 +531,13 @@ class Config
         $prefix = '.wpsr-tiktok-feed-template-'.$postId;
         return [
             'styles' => array(
+                'profile_photo' => array(
+                    // Scoped to the minimal layout — that is the only header that rings the photo.
+                    'selector' => $prefix.' .wpsr-tiktok-feed-header.wpsr-tiktok-feed-header-layout-minimal .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-profile-pic img',
+                    'color'  => array(
+                        'border_color' => Arr::get($settings,'styles.profile_photo.color.border_color', '')
+                    )
+                ),
                 'user_name' => array(
                     'selector' => $prefix.' .wpsr-tiktok-feed-header .wpsr-tiktok-feed-user-info-wrapper .wpsr-tiktok-feed-user-info-head .wpsr-tiktok-feed-header-info .wpsr-tiktok-feed-user-info .wpsr-tiktok-feed-user-info-name-wrapper a',
                     'color'  => array(
