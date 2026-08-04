@@ -1,5 +1,6 @@
 <?php
 
+use CustomFeedForTiktok\Application\Services\Platforms\Feeds\Tiktok\Helper as TiktokHelper;
 use WPSocialReviews\Framework\Support\Arr;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -42,6 +43,8 @@ $wpsr_tiktok_display_profile_photo = Arr::get($wpsr_tiktok_header_settings, 'dis
 $wpsr_tiktok_profile_photo_hide_class = $wpsr_tiktok_display_profile_photo === 'false' ? 'wpsr-tiktok-feed-profile-pic-hide' : ''; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $wpsr_tiktok_display_header = Arr::get($wpsr_tiktok_header_settings, 'display_header'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
+$wpsr_tiktok_header_layout_class = TiktokHelper::getHeaderLayoutClass($feed_settings); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+
 echo '<div  id="wpsr-tiktok-feed-' . esc_attr($templateId) . '" class="' . esc_attr(implode(' ', $wpsr_tiktok_classes)) . '" ' . esc_attr(implode(' ',
         $wpsr_tiktok_data_attrs)) . '  data-column="' . esc_attr($wpsr_tiktok_desktop_column_number) . '">';
 echo '<div class="wpsr-loader">
@@ -55,7 +58,7 @@ if ($wpsr_tiktok_display_header === 'true' && !empty($header)) {
     $wpsr_tiktok_profile_deep_link = Arr::get($header, 'profile_deep_link', ''); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
     echo '<div class="wpsr-row">
-        <div class="wpsr-tiktok-feed-header wpsr-col-12 ' . ($wpsr_tiktok_header_settings['display_profile_photo'] === 'false' ? 'wpsr-tiktok-feed-profile-pic-hide' : '') . '">
+        <div class="wpsr-tiktok-feed-header ' . esc_attr($wpsr_tiktok_header_layout_class) . ' wpsr-col-12 ' .($wpsr_tiktok_header_settings['display_profile_photo'] === 'false' ? 'wpsr-tiktok-feed-profile-pic-hide' : '') . '">
             <div class="wpsr-tiktok-feed-user-info-wrapper">
                 <div class="wpsr-tiktok-feed-user-info-head">
                     <div class="wpsr-tiktok-feed-header-info">';
