@@ -742,7 +742,7 @@ class TiktokFeed extends BaseFeed
             $body_args = [];
 
             if($feedType === 'user_feed') {
-                $fields = 'video/list/?fields=id,title,duration,cover_image_url,embed_link,create_time';
+                $fields = 'video/list/?fields=id,title,video_description,duration,cover_image_url,embed_link,create_time';;
                 $fields = apply_filters('custom_feed_for_tiktok/tiktok_video_api_details', $fields);
                 $fetchUrl = $this->remoteFetchUrl . $fields ;
                 $body_args = [
