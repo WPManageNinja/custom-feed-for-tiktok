@@ -4,7 +4,7 @@ Tags: TikTok feed, tiktok feed wordpress, tiktok gallery plugin, TikTok plugin, 
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -187,6 +187,14 @@ The free version includes a responsive Grid layout. The Pro version has Masonry 
 7. 100% responsive on desktop, tablet, and mobile devices
 
 == Changelog ==
+
+1.2.4
+- Added two new TikTok feed templates — Overlay Card and Spotlight Hero. (Pro)
+- Added a Minimal header layout option for TikTok feeds, alongside the existing Classic header.
+- Added a Profile Photo border color control in the Header styling tab for the Minimal header layout. (Pro)
+- Improved keyboard navigation and screen reader labels for TikTok feed cards, video links and the video popup.
+- Fixed video captions not rendering on TikTok feeds by requesting the video description with the feed data.
+- Fixed the "show/hide posts containing these words or hashtags" filters matching only the video title and never the caption. (Pro)
 
 1.2.4
 - Introduced a centralized OAuth bridge connection flow for TikTok, replacing legacy per-platform OAuth redirects.

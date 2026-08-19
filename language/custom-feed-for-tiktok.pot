@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Custom Feed for TikTok\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 12:32+0000\n"
+"POT-Creation-Date: 2026-08-17 15:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -32,7 +32,7 @@ msgstr ""
 
 #: app/Services/Widgets/TikTokWidget.php:265
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:206
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:217
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:244
 msgid "Author"
 msgstr ""
 
@@ -52,11 +52,11 @@ msgstr ""
 msgid "Background Color"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:204
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:323
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:385
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:435
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:473
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:231
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:350
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:412
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:462
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:500
 msgid "Background Color:"
 msgstr ""
 
@@ -64,9 +64,9 @@ msgstr ""
 msgid "Background Hover Color"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:347
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:409
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:452
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:374
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:436
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:479
 msgid "Background Hover Color:"
 msgstr ""
 
@@ -78,9 +78,13 @@ msgstr ""
 msgid "Border"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:354
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:416
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:490
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:155
+msgid "Border Color:"
+msgstr ""
+
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:381
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:443
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:517
 msgid "Border Hover Color:"
 msgstr ""
 
@@ -99,8 +103,8 @@ msgstr ""
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:231
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:265
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:299
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:144
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:164
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:171
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:191
 msgid "Bottom Spacing"
 msgstr ""
 
@@ -141,7 +145,7 @@ msgstr ""
 
 #: app/Services/Widgets/TikTokWidget.php:257
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:197
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:214
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:241
 msgid "Content"
 msgstr ""
 
@@ -172,7 +176,7 @@ msgstr ""
 
 #: app/Services/Widgets/TikTokWidget.php:412
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:94
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:157
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:184
 msgid "Description"
 msgstr ""
 
@@ -186,12 +190,12 @@ msgstr ""
 
 #: app/Services/Widgets/TikTokWidget.php:199
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:312
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:302
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:329
 #: app/Services/Widgets/Beaver/TikTok/TikTokWidget.php:268
 msgid "Follow Button"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:112
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:118
 msgid "Follow on TikTok"
 msgstr ""
 
@@ -220,7 +224,7 @@ msgstr ""
 
 #: app/Services/Widgets/TikTokWidget.php:356
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:52
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:134
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:140
 #: app/Services/Widgets/Beaver/TikTok/TikTokWidget.php:90
 msgid "Header"
 msgstr ""
@@ -229,7 +233,7 @@ msgstr ""
 msgid "Header Background Color"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:194
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:221
 msgid "Header Box"
 msgstr ""
 
@@ -237,8 +241,8 @@ msgstr ""
 msgid "Hover Color"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:332
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:394
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:359
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:421
 msgid "Hover Style"
 msgstr ""
 
@@ -256,19 +260,19 @@ msgstr ""
 
 #: app/Services/Widgets/TikTokWidget.php:557
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:396
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:462
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:489
 msgid "Item Box"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:426
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:453
 msgid "Item Box Content"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:444
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:471
 msgid "Item Box Content Hover"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:482
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:509
 msgid "Item Box Hover Style"
 msgstr ""
 
@@ -285,7 +289,7 @@ msgstr ""
 msgid "Line Height"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:117
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:123
 msgid "Load More"
 msgstr ""
 
@@ -319,7 +323,7 @@ msgstr ""
 
 #: app/Services/Widgets/TikTokWidget.php:101
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:352
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:364
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:391
 msgid "Pagination"
 msgstr ""
 
@@ -336,23 +340,27 @@ msgid "Post Author"
 msgstr ""
 
 #: app/Services/Widgets/TikTokWidget.php:294
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:234
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:261
 #: app/Services/Widgets/Beaver/TikTok/TikTokWidget.php:186
 msgid "Post Date"
 msgstr ""
 
 #: app/Services/Widgets/TikTokWidget.php:323
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:198
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:251
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:278
 #: app/Services/Widgets/Beaver/TikTok/TikTokWidget.php:210
 msgid "Post Text"
+msgstr ""
+
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:143
+msgid "Profile Photo"
 msgstr ""
 
 #: app/Services/Widgets/Beaver/TikTok/TikTokWidget.php:224
 msgid "Read More Link Color"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:292
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:319
 msgid "Read More Link Color:"
 msgstr ""
 
@@ -388,7 +396,7 @@ msgstr ""
 
 #: app/Services/Widgets/TikTokWidget.php:460
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:124
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:177
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:204
 msgid "Statistics"
 msgstr ""
 
@@ -397,7 +405,7 @@ msgid "Statistics Color"
 msgstr ""
 
 #: app/Services/Widgets/Oxygen/TikTokWidget.php:274
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:268
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:295
 #: app/Services/Widgets/Beaver/TikTok/TikTokWidget.php:244
 msgid "Statistics Count"
 msgstr ""
@@ -430,20 +438,20 @@ msgstr ""
 msgid "Text Color"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:148
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:168
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:185
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:225
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:242
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:259
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:276
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:316
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:378
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:175
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:195
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:212
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:252
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:269
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:286
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:303
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:343
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:405
 msgid "Text Color:"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:340
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:402
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:367
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:429
 msgid "Text Hover Color:"
 msgstr ""
 
@@ -507,8 +515,8 @@ msgid ""
 "enable the optimize images option."
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:312
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:374
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:339
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:401
 msgid "Top Spacing"
 msgstr ""
 
@@ -531,7 +539,7 @@ msgid "Typography"
 msgstr ""
 
 #: app/Services/Widgets/TikTokWidget.php:364
-#: app/Services/Platforms/Feeds/Tiktok/Config.php:137
+#: app/Services/Platforms/Feeds/Tiktok/Config.php:164
 msgid "User Name"
 msgstr ""
 
