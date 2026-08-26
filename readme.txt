@@ -188,7 +188,7 @@ The free version includes a responsive Grid layout. The Pro version has Masonry 
 
 == Changelog ==
 
-1.2.4
+1.2.5
 - Added two new TikTok feed templates — Overlay Card and Spotlight Hero. (Pro)
 - Added a Minimal header layout option for TikTok feeds, alongside the existing Classic header.
 - Added a Profile Photo border color control in the Header styling tab for the Minimal header layout. (Pro)
