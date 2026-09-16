@@ -17,7 +17,7 @@ When invoked, follow these steps **in order**:
 ### Step 1: Determine the base branch
 
 - If the user passed an argument, use that as the base branch.
-- Otherwise default to `development`.
+- Otherwise default to `develop`.
 
 ### Step 2: Check for user input
 
@@ -184,8 +184,8 @@ Then present the path as a clickable link and output: `PR description saved to [
 
 First check the current branch with `git rev-parse --abbrev-ref HEAD`, then decide:
 
-- **If already on a feature branch** (anything other than `development`/`master`): a branch already exists — **skip branch creation entirely**. Do nothing in git. The skill's only output for this run is the generated title + description (already written in Step 7). Report: `Already on feature branch <name> — generated title + description only, no branch created.`
-- **If currently on a base branch** (`development` or `master`): create a branch from the **exact PR title** so the working changes live on a feature branch ready to push:
+- **If already on a feature branch** (anything other than `develop`/`master`): a branch already exists — **skip branch creation entirely**. Do nothing in git. The skill's only output for this run is the generated title + description (already written in Step 7). Report: `Already on feature branch <name> — generated title + description only, no branch created.`
+- **If currently on a base branch** (`develop` or `master`): create a branch from the **exact PR title** so the working changes live on a feature branch ready to push:
   1. Derive the branch name from the PR title: lowercase it, replace every run of non-alphanumeric characters with a single hyphen, trim leading/trailing hyphens, and cap at ~50 characters. Example: `"Add plain-PHP mb_* fallbacks for servers missing mbstring"` → `add-plain-php-mb-fallbacks-for-servers-missing-mbst`.
   2. Create and switch with `git checkout -b <derived-name>`. Uncommitted working changes carry over automatically — do not stash or commit them here.
   3. Report: `Branch ready: <branch-name>`.
@@ -218,7 +218,7 @@ Silently fix before outputting:
 
 ### Rules
 
-- **Default base branch is `development`**, not `master`.
+- **Default base branch is `develop`**, not `master`.
 - **Always read the template file fresh.** Never rely on a hardcoded copy — the template may change.
 - **Always show the summary first** and wait for user approval before writing the file.
 - **Be concise but complete.** Don't pad with fluff.
@@ -232,6 +232,6 @@ Silently fix before outputting:
 - **`## Anything the reviewer should know?` is always bot-focused.** Never put human workflow context here. Never omit this section.
 - **Store the exact title** as the top `<!-- PR TITLE: ... -->` comment in the file, and derive the branch name from that same title — title, file, and branch must stay consistent.
 - **Never commit, stage, force-add, or push `dev-works/pr-description.md`.** It is deliberately gitignored and kept local.
-- **Branch creation only runs when on a base branch** (`development`/`master`). On an existing feature branch, report it and leave it untouched — never re-branch off a feature branch.
+- **Branch creation only runs when on a base branch** (`develop`/`master`). On an existing feature branch, report it and leave it untouched — never re-branch off a feature branch.
 - **Commit with the exact title and description from the file — never regenerate the commit message.** The commit subject is the `<!-- PR TITLE: ... -->` text; the commit body is the PR description body verbatim. Use `git commit -F <tempfile>`, never an inline regenerated summary.
 - **Never push.** The skill creates the branch and the commit only; pushing and opening the PR are left to the user.
