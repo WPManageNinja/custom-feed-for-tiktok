@@ -2,23 +2,15 @@
 defined('ABSPATH') or die;
 
 /**
- * All registered action's handlers should be in app\Hooks\Handlers,
- * addAction is similar to add_action and addCustomAction is just a
- * wrapper over add_action which will add a prefix to the hook name
- * using the plugin slug to make it unique in all wordpress plugins,
- * ex: $app->addCustomAction('foo', ['FooHandler', 'handleFoo']) is
- * equivalent to add_action('slug-foo', ['FooHandler', 'handleFoo']).
+ * Action handlers live in app/Hooks/Handlers.
+ * $app is the core plugin's app, so addCustomAction() prefixes hooks with core's hook prefix.
  */
 
 /**
- * @var $app CustomFeedForTiktok\Application\Application
+ * @var $app WPSocialReviews\Framework\Foundation\Application
  */
 
-/*******
- *
- * Tiktok feed templates action hooks
- *
- *******/
+// TikTok feed template hooks
 
 (new \CustomFeedForTiktok\Application\Hooks\Handlers\PlatformHandler())->register();
 
@@ -36,25 +28,17 @@ $app->addAction('wp_ajax_wpsr_get_more_feeds', 'ShortcodeHandler@handleLoadMoreA
 $app->addAction('wp_ajax_nopriv_wpsr_get_more_feeds', 'ShortcodeHandler@handleLoadMoreAjax');
 
 
-/*
- * Oxygen Widget Init
- */
+// Oxygen Builder
 if (class_exists('OxyEl') ) {
     if ( file_exists( CUSTOM_FEED_FOR_TIKTOK_DIR.'app/Services/Widgets/Oxygen/OxygenWidget.php' ) ) {
         new CustomFeedForTiktok\Application\Services\Widgets\Oxygen\OxygenWidget();
     }
 }
 
-/*
- * Elementor Widget Init
- */
 if (defined('ELEMENTOR_VERSION')) {
     new CustomFeedForTiktok\Application\Services\Widgets\ElementorWidget();
 }
 
-/*
- * Beaver Builder Widget Init
- */
 if ( class_exists( 'FLBuilder' ) ) {
     new CustomFeedForTiktok\Application\Services\Widgets\Beaver\BeaverWidget();
 }

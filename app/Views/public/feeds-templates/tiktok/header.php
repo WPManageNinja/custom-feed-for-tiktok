@@ -25,7 +25,6 @@ if ($layout_type === 'carousel') {
 $wpsr_tiktok_data_attrs[] = $layout_type === 'carousel' && defined('WPSOCIALREVIEWS_PRO') ? 'data-slider_settings=' . json_encode($wpsr_tiktok_slider_data) . '' : ''; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $wpsr_tiktok_feed_type = Arr::get($feed_settings, 'source_settings.feed_type'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
-// wrapper classes
 $wpsr_tiktok_classes   = array('wpsr-tiktok-feed-wrapper', 'wpsr-feed-wrap', 'wpsr_content'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $wpsr_tiktok_classes[] = $template === 'template2' ? 'wpsr-tiktok-feed-template2' : ''; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $wpsr_tiktok_classes[] = 'wpsr-tiktok-feed-' . esc_attr($template) . ''; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
@@ -85,9 +84,9 @@ if ($wpsr_tiktok_display_header === 'true' && !empty($header)) {
                         do_action('custom_feed_for_tiktok/tiktok_feed_bio_description', $wpsr_tiktok_header_settings, $header);
 
                         /**
-                         * tiktok_feed_statistics hook.
+                         * tiktok_header_statistics hook.
                          *
-                         * @hooked render_tiktok_feed_statistics 10
+                         * @hooked TiktokTemplateHandlerPro::renderTiktokHeaderStatistics 10
                          * */
                         do_action('custom_feed_for_tiktok/tiktok_header_statistics', $wpsr_tiktok_header_settings, $header, $translations);
 

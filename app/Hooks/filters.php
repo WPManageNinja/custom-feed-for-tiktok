@@ -2,20 +2,14 @@
 defined('ABSPATH') or die;
 
 /**
- * All registered filter's handlers should be in app\Hooks\Handlers,
- * addFilter is similar to add_filter and addCustomFlter is just a
- * wrapper over add_filter which will add a prefix to the hook name
- * using the plugin slug to make it unique in all wordpress plugins,
- * ex: $app->addCustomFilter('foo', ['FooHandler', 'handleFoo']) is
- * equivalent to add_filter('slug-foo', ['FooHandler', 'handleFoo']).
+ * Filter handlers live in app/Hooks/Handlers.
+ * $app is the core plugin's app, so addCustomFilter() prefixes hooks with core's hook prefix.
  */
 
 /**
- * $app
- * @var $app CustomFeedForTiktok\Application\Application
+ * @var $app WPSocialReviews\Framework\Foundation\Application
  */
 
-// tiktok feed hooks
 $app->addFilter('wpsocialreviews/get_paginated_feed_html', 'CustomFeedForTiktok\Application\Hooks\Handlers\TiktokTemplateHandler@getPaginatedFeedHtml', 10, 2);
 $app->addFilter('wpsocialreviews/render_tiktok_template', 'CustomFeedForTiktok\Application\Hooks\Handlers\ShortcodeHandler@renderTiktokTemplate', 10, 2);
 $app->addFilter('wpsocialreviews/format_tiktok_config', 'CustomFeedForTiktok\Application\Hooks\Handlers\TiktokTemplateHandler@formatTiktokConfig', 10, 2);

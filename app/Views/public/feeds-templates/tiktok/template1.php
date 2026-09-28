@@ -12,13 +12,12 @@ if (!empty($feeds) && is_array($feeds)) {
     $wpsr_tiktok_layout_type = isset($template_meta['layout_type']) && defined('WPSOCIALREVIEWS_PRO') ? $template_meta['layout_type'] : 'grid'; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
     $wpsr_tiktok_animation_img_class = $wpsr_tiktok_layout_type === 'carousel' ? 'wpsr-animated-background' : ''; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
-    // Check if the feed type is user_feed and the pro version is not defined
+    // Only user feeds are free. Other feed types need Pro.
     if ($wpsr_tiktok_feed_type !== 'user_feed' && !defined('WPSOCIALREVIEWS_PRO')) {
         echo '<p>' . esc_html__('You need to upgrade to pro to use this feature.', 'custom-feed-for-tiktok') . '</p>';
         return;
     }
 
-    // Check if post_settings exist in template_meta, if not, return
     if (!Arr::get($template_meta, 'post_settings')) {
         return;
     }

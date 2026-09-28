@@ -1,10 +1,7 @@
 <?php
 
 /**
- * Shortcode Handler
- *
- * This addon plugin integrates with WP Social Reviews base plugin.
- * Uses 'wpsocialreviews/*' hooks for template rendering integration.
+ * Renders TikTok feed templates through the core plugin's 'wpsocialreviews/*' hooks.
  */
 
 namespace CustomFeedForTiktok\Application\Hooks\Handlers;
@@ -25,7 +22,7 @@ class ShortcodeHandler
     use LoadView;
     public function renderTiktokTemplate($templateId, $platform)
     {
-        // Clear LiteSpeed cache if plugin is active
+        // Tag the page so a LiteSpeed purge of wpsn_purge_tiktok clears it.
         if (defined('LSCWP_V')) {
             do_action('litespeed_tag_add', 'wpsn_purge_tiktok'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
         }
@@ -42,22 +39,14 @@ class ShortcodeHandler
         $settings      = $shortcodeHandler->formatFeedSettings($feed);
 
 
-        //template mapping
         $templateMapping = [
             'template1' => 'public/feeds-templates/tiktok/template1',
         ];
 
         $template = Arr::get($settings['feed_settings'], 'template', '');
-//        if (!isset($templateMapping[$template])) {
-//            return '<p>' . __('No Templates found!! Please save and try again', 'custom-feed-for-tiktok') . '</p>';
-//        }
-
-//        $file = $templateMapping[$template];
-
         $layout = Arr::get($settings, 'feed_settings.layout_type');
         do_action('wp_social_review_loading_layout_' . $layout, $templateId, $settings); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
-        //pagination settings
         $pagination_settings = $shortcodeHandler->formatPaginationSettings($feed);
 
         $translations = GlobalSettings::getTranslations();
@@ -69,7 +58,6 @@ class ShortcodeHandler
         if (Arr::get($settings['feed_settings'], 'post_settings.display_mode') === 'popup') {
             $feeds = $settings['feeds'];
             foreach ($feeds as $index => $feed) {
-                /* translators: %s: Human-readable time difference. */
                 $create_time = Arr::get($feed, 'created_at');
                 /* translators: %s: Human-readable time difference. */
                 $feeds[$index]['time_ago'] = sprintf(__('%s ago', 'custom-feed-for-tiktok'), human_time_diff($create_time));
@@ -85,7 +73,7 @@ class ShortcodeHandler
         $dp = $image_settings['optimized_images'] === 'true' ? Arr::get($settings, 'header.avatar.local_avatar') : Arr::get($settings, 'header.data.user.avatar_url');
         $settings['header']['data']['user']['avatar_url'] = $dp;
 
-        //enable when gdpr is on
+        // Resize client-side when optimized images are on and some images aren't resized yet.
         $resizedImages = Arr::get($settings, 'dynamic.resize_data', []);
         if(Arr::get($image_settings, 'optimized_images', 'false') === 'true' && (count($resizedImages) < count($feeds) || $hasLatestPost)) {
             wp_enqueue_script('wpsr-image-resizer');
