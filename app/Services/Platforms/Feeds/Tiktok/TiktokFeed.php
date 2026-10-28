@@ -21,6 +21,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class TiktokFeed extends BaseFeed
 {
+    /**
+     * TikTok app generation the account was authorized against.
+     * Bump when the TikTok developer app changes; accounts without it must reconnect.
+     */
+    const AUTH_APP_VERSION = 2;
+
     public $platform = 'tiktok';
     protected $authProvider = 'tiktok';
     protected $authFlow = 'feed';
@@ -181,6 +187,7 @@ class TiktokFeed extends BaseFeed
             'expiration_time' => time() + $expires_in,
             'refresh_expires_in' => $refresh_expires_in,
             'open_id' => $open_id,
+            'auth_app_version' => self::AUTH_APP_VERSION,
             'error_message'  => '',
             'error_code'     => '',
             'has_app_permission_error'     => false,
