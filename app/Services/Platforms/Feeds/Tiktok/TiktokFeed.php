@@ -565,6 +565,7 @@ class TiktokFeed extends BaseFeed
             'sources'          => $this->getConnectedSourceList(),
             'template_details' => $templateDetails,
             'elements'         => $tiktokConfig->getStyleElement(),
+            'default_styles'   => $tiktokConfig->formatStylesConfig([], $postId),
             'translations'     => $translations
         ], 200);
     }
