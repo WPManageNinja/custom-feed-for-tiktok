@@ -338,6 +338,15 @@ class TiktokFeed extends BaseFeed
     public function getVerificationConfigs()
     {
         $connected_source_list  = $this->getConnectedSourceList();
+
+        foreach ($connected_source_list as $key => $source) {
+            if (!is_array($source)) {
+                continue;
+            }
+            $lastSynced = $this->cacheHandler->getSourceLastUpdated(Arr::get($source, 'open_id', $key));
+            $connected_source_list[$key] = array_merge($source, Helper::formatLastSynced($lastSynced));
+        }
+
         wp_send_json_success([
             'connected_source_list'  => $connected_source_list,
             'status'                 => true,
