@@ -687,6 +687,20 @@ class TiktokFeed extends BaseFeed
         }
     }
 
+    /**
+     * The tier ceiling applies after tiktok_feeds_limit, so the filter can lower a feed but not
+     * lift it past the tier. Pro's ceiling is itself filterable; a feed is cached as one blob.
+     */
+    public function resolveFeedLimit($feedCount)
+    {
+        $limit = absint(apply_filters('custom_feed_for_tiktok/tiktok_feeds_limit', absint($feedCount)));
+        $max   = defined('WPSOCIALREVIEWS_PRO')
+            ? absint(apply_filters('custom_feed_for_tiktok/tiktok_feeds_max_limit', 200))
+            : 10;
+
+        return max(1, min($limit, max(1, $max)));
+    }
+
     public function getAccountFeed($account, $apiSettings, $cache = false)
     {
         $accessToken = $this->protector->decrypt($account['access_token']) ?: $account['access_token'];
@@ -700,12 +714,7 @@ class TiktokFeed extends BaseFeed
         $accessToken = $tokenResult;
         $feedType       = Arr::get($apiSettings, 'feed_type', 'user_feed');
 
-        $totalFeed      = Arr::get($apiSettings, 'feed_count');
-        $totalFeed      = !defined('WPSOCIALREVIEWS_PRO') && $totalFeed > 10 ? 10 : $totalFeed;
-        $totalFeed      = apply_filters('custom_feed_for_tiktok/tiktok_feeds_limit', $totalFeed);
-        if(defined('WPSOCIALREVIEWS_PRO') && $totalFeed > 200){
-            $totalFeed = 200;
-        }
+        $totalFeed      = $this->resolveFeedLimit(Arr::get($apiSettings, 'feed_count'));
 
         if($totalFeed >= 20){
             $perPage = 20;
