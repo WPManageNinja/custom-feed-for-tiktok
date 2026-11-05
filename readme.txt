@@ -4,7 +4,7 @@ Tags: TikTok feed, tiktok feed wordpress, tiktok gallery plugin, TikTok plugin, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.5
+Stable tag: 1.2.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -187,6 +187,9 @@ The free version includes a responsive Grid layout. The Pro version has Masonry 
 7. 100% responsive on desktop, tablet, and mobile devices
 
 == Changelog ==
+
+1.2.6
+- Added support for the Reset All option in the template editor's Style tab, which restores a TikTok template's default styles.
 
 1.2.5
 - Added two new TikTok feed templates — Overlay Card and Spotlight Hero. (Pro)
