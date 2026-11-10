@@ -41,7 +41,7 @@ class CFFT_Fl_TikTok_Module extends FLBuilderModule { // phpcs:ignore WordPress.
 
         $this->add_css(
             'wp_social_ninja_tt',
-            WPSOCIALREVIEWS_URL . 'assets/css/wp_social_ninja_tt.css',
+            WPSOCIALREVIEWS_URL . 'assets/css/wp_social_ninja_tt' . (is_rtl() ? '-rtl' : '') . '.css',
             array(),
             WPSOCIALREVIEWS_VERSION
         );

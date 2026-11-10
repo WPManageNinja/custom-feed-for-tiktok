@@ -47,7 +47,7 @@ class ElementorWidget
     {
         wp_register_style(
             'wp_social_ninja_tt',
-            WPSOCIALREVIEWS_URL . 'assets/css/wp_social_ninja_tt.css',
+            WPSOCIALREVIEWS_URL . 'assets/css/wp_social_ninja_tt' . (is_rtl() ? '-rtl' : '') . '.css',
             array(),
             WPSOCIALREVIEWS_VERSION
         );
