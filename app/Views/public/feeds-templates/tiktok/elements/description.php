@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <div class="wpsr-feed-description-link">
-    <p class="wpsr-feed-description-text wpsr-tiktok-feed-content">
+    <p class="wpsr-feed-description-text wpsr-tiktok-feed-content" dir="auto">
         <?php
         if ($content_length) {
             echo esc_html(wp_trim_words($message, $content_length, '...'));
