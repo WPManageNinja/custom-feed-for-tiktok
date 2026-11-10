@@ -70,7 +70,7 @@ if ($wpsr_tiktok_display_header === 'true' && !empty($header)) {
                         echo '<div class="wpsr-tiktok-feed-user-info">
                                 <div class="wpsr-tiktok-feed-user-info-name-wrapper">';
                         if ($wpsr_tiktok_display_name && $wpsr_tiktok_header_settings['display_page_name'] === 'true') {
-                            echo '<a class="wpsr-tiktok-feed-user-info-name" rel="nofollow" href="' . esc_url($wpsr_tiktok_profile_deep_link) . '" title="' . esc_attr($wpsr_tiktok_display_name) . '" target="_blank">
+                            echo '<a class="wpsr-tiktok-feed-user-info-name" dir="auto" rel="nofollow" href="' . esc_url($wpsr_tiktok_profile_deep_link) . '" title="' . esc_attr($wpsr_tiktok_display_name) . '" target="_blank">
                                       ' . esc_html($wpsr_tiktok_display_name) . '
                                   </a>';
                         }
