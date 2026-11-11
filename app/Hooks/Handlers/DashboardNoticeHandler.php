@@ -70,7 +70,7 @@ class DashboardNoticeHandler
             'group'       => 'reconnect',
             'label'       => __('TikTok', 'custom-feed-for-tiktok'),
             'path'        => __('Go to Platforms → TikTok → Reconnect, and sign in with the same TikTok account.', 'custom-feed-for-tiktok'),
-            // Core hides a dismissed add-on notice only until reload, so a deadline notice offers no close button.
+            // Core hides a dismissed add-on notice only until reload, so this notice offers no close button.
             'dismissible' => false,
         ];
 
