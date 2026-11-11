@@ -189,6 +189,8 @@ The free version includes a responsive Grid layout. The Pro version has Masonry 
 == Changelog ==
 
 1.2.6
+- Moved Custom Feed for TikTok to a new TikTok app. The old TikTok app will be deleted on December 15, 2026, so TikTok accounts connected before this update must be reconnected to keep their feeds updating.
+- Added right-to-left (RTL) support for Arabic, Hebrew, Persian, and other RTL languages, on the front end and in the admin.
 - Added support for the Reset All option in the template editor's Style tab, which restores a TikTok template's default styles.
 
 1.2.5
