@@ -134,11 +134,12 @@ class TiktokFeed extends BaseFeed
      * bridge flow (persistAuthResult). The token array is the decoded TikTok oauth/token
      * response: access_token, refresh_token, expires_in, refresh_expires_in, open_id.
      *
-     * @param array $token
+     * @param array  $token
+     * @param string $replaceOpenId Connected account the admin chose to reconnect, or ''.
      * @return array account metadata (open_id, display_name, username)
      * @throws \Exception
      */
-    protected function persistTokenConfig($token = [])
+    protected function persistTokenConfig($token = [], $replaceOpenId = '')
     {
         $access_token = Arr::get($token, 'access_token');
         if (empty($access_token)) {
@@ -150,7 +151,7 @@ class TiktokFeed extends BaseFeed
         $expires_in = intval(Arr::get($token, 'expires_in'));
         $open_id = Arr::get($token, 'open_id');
 
-        $fetchUrl = $this->remoteFetchUrl . 'user/info/?fields=avatar_url,display_name,profile_deep_link';
+        $fetchUrl = $this->remoteFetchUrl . 'user/info/?fields=open_id,union_id,avatar_url,display_name,profile_deep_link';
         $response = wp_remote_get($fetchUrl, [
             'headers' => [
                 'Authorization' => "Bearer " . $access_token,
@@ -177,6 +178,10 @@ class TiktokFeed extends BaseFeed
         $name = Arr::get($responseArr, 'data.user.display_name');
         $profile_url = Arr::get($responseArr, 'data.user.profile_deep_link');
         $avatar = Arr::get($responseArr, 'data.user.avatar_url');
+        $union_id = (string) Arr::get($responseArr, 'data.user.union_id', '');
+        if (empty($open_id)) {
+            $open_id = Arr::get($responseArr, 'data.user.open_id');
+        }
 
         $data = [
             'display_name' => $name,
@@ -187,15 +192,23 @@ class TiktokFeed extends BaseFeed
             'expiration_time' => time() + $expires_in,
             'refresh_expires_in' => $refresh_expires_in,
             'open_id' => $open_id,
-            'auth_app_version' => self::AUTH_APP_VERSION,
+            'auth_app_version' => self::authAppVersion(Arr::get($token, 'app')),
             'error_message'  => '',
             'error_code'     => '',
             'has_app_permission_error'     => false,
             'has_critical_error'     => false,
             'encryption_error'     => false,
+            'union_id' => $union_id,
         ];
 
         $sourceList = $this->getConnectedSourceList();
+        $replacedIds = $this->findReplacedAccounts($sourceList, (string) $open_id, $union_id, (string) $replaceOpenId);
+        $replacedAccounts = [];
+        foreach ($replacedIds as $replacedId) {
+            $replacedAccounts[$replacedId] = $sourceList[$replacedId];
+            unset($sourceList[$replacedId]);
+        }
+
         $sourceList[$open_id] = $data;
         $accountArgs = [
             'user_id' => $open_id,
@@ -205,6 +218,10 @@ class TiktokFeed extends BaseFeed
         $this->clearFeedCache($open_id);
         $this->errorManager->removeErrors('connection', $accountArgs);
         update_option('wpsr_tiktok_connected_sources_config', array('sources' => $sourceList));
+
+        foreach ($replacedAccounts as $replacedId => $replacedAccount) {
+            $this->retireReplacedAccount($replacedId, $replacedAccount, $open_id);
+        }
 
         // add global tiktok settings when user verified
         $this->setGlobalSettings();
@@ -237,11 +254,168 @@ class TiktokFeed extends BaseFeed
             throw new \RuntimeException(__('Invalid auth platform response.', 'custom-feed-for-tiktok')); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
         }
 
+        // Set by core's BaseFeed from the prepare transient; older cores do not have it.
+        $localState = (isset($this->authLocalState) && is_array($this->authLocalState)) ? $this->authLocalState : [];
+
         $token = Arr::get($result, 'token', []);
-        $result['account']  = $this->persistTokenConfig($token);
+        $result['account']  = $this->persistTokenConfig($token, (string) Arr::get($localState, 'replace_open_id', ''));
         $result['platform'] = $this->platform;
 
         return $result;
+    }
+
+    /**
+     * New connections use the new TikTok app. Core sends this to the bridge only when it supports
+     * platform connect fields, so an older core keeps the original app.
+     *
+     * @param array $settings
+     * @return array<string, string>
+     */
+    protected function authConnectFields($settings = [])
+    {
+        return ['tiktok_app' => 'v2'];
+    }
+
+    /**
+     * The account the admin chose to reconnect. Kept in the WordPress prepare transient only.
+     *
+     * @param array $settings
+     * @return array<string, string>
+     */
+    protected function authLocalState($settings = [])
+    {
+        $replaceOpenId = sanitize_text_field((string) Arr::get($settings, 'replace_open_id', ''));
+
+        return $replaceOpenId !== '' ? ['replace_open_id' => $replaceOpenId] : [];
+    }
+
+    /**
+     * Connected accounts the new account replaces. TikTok gives each app its own open_id for the
+     * same user, so an account moved to the new app arrives with a new open_id.
+     *
+     * @param array  $sourceList
+     * @param string $openId
+     * @param string $unionId
+     * @param string $replaceOpenId
+     * @return string[]
+     */
+    private function findReplacedAccounts($sourceList, $openId, $unionId, $replaceOpenId)
+    {
+        $replaced = [];
+
+        if ($replaceOpenId !== '' && $replaceOpenId !== $openId && isset($sourceList[$replaceOpenId])) {
+            $targetUnionId = $this->sourceUnionId($replaceOpenId, $sourceList[$replaceOpenId]);
+            // A known, different union_id means the admin signed in as another creator.
+            if ($unionId === '' || $targetUnionId === '' || $targetUnionId === $unionId) {
+                $replaced[] = $replaceOpenId;
+            }
+        }
+
+        if ($unionId !== '') {
+            foreach ($sourceList as $sourceId => $source) {
+                $sourceId = (string) $sourceId;
+                if ($sourceId === $openId || in_array($sourceId, $replaced, true)) {
+                    continue;
+                }
+                if ($this->sourceUnionId($sourceId, $source) === $unionId) {
+                    $replaced[] = $sourceId;
+                }
+            }
+        }
+
+        return $replaced;
+    }
+
+    /**
+     * @param string $openId
+     * @param array  $source
+     * @return string
+     */
+    private function sourceUnionId($openId, $source)
+    {
+        $unionId = (string) Arr::get($source, 'union_id', '');
+        if ($unionId !== '') {
+            return $unionId;
+        }
+
+        // Accounts connected before union_id was stored: the header cache has it.
+        $header = $this->cacheHandler->getFeedCache('user_account_header_' . $openId);
+
+        return (string) Arr::get($header, 'data.user.union_id', '');
+    }
+
+    /**
+     * Point templates at the new account and remove what belonged to the old one.
+     *
+     * @param string $oldId
+     * @param array  $oldAccount
+     * @param string $newId
+     * @return void
+     */
+    private function retireReplacedAccount($oldId, $oldAccount, $newId)
+    {
+        $this->moveTemplatesToAccount($oldId, $newId);
+
+        $oldAccount['open_id']  = $oldId;
+        $oldAccount['user_id']  = $oldId;
+        $oldAccount['username'] = $oldId;
+        $this->errorManager->removeErrors('connection', $oldAccount);
+        $this->platfromData->deleteDataByUser($oldAccount);
+        $this->clearFeedCache($oldId);
+
+        $displayName = (string) Arr::get($oldAccount, 'display_name', '');
+        $avatars = get_option('wpsr_tiktok_local_avatars', []);
+        if ($displayName !== '' && is_array($avatars) && isset($avatars[$displayName])) {
+            unset($avatars[$displayName]);
+            update_option('wpsr_tiktok_local_avatars', $avatars);
+        }
+
+        $this->cacheHandler->clearPageCaches($this->platform);
+    }
+
+    /**
+     * @param string $oldId
+     * @param string $newId
+     * @return void
+     */
+    private function moveTemplatesToAccount($oldId, $newId)
+    {
+        global $wpdb;
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $postIds = $wpdb->get_col($wpdb->prepare(
+            "SELECT pm.post_id FROM {$wpdb->postmeta} pm INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+             WHERE p.post_type = %s AND pm.meta_key = %s AND pm.meta_value LIKE %s",
+            'wp_social_reviews',
+            '_wpsr_template_config',
+            '%' . $wpdb->esc_like($oldId) . '%'
+        ));
+
+        foreach ($postIds as $postId) {
+            $config = json_decode((string) get_post_meta($postId, '_wpsr_template_config', true), true);
+            if (!is_array($config) || Arr::get($config, 'feed_settings.platform') !== $this->platform) {
+                continue;
+            }
+
+            $changed = false;
+            $selected = Arr::get($config, 'feed_settings.source_settings.selected_accounts', []);
+            if (is_array($selected) && in_array($oldId, $selected, true)) {
+                $selected = array_map(function ($accountId) use ($oldId, $newId) {
+                    return $accountId === $oldId ? $newId : $accountId;
+                }, $selected);
+                $config['feed_settings']['source_settings']['selected_accounts'] = array_values(array_unique($selected));
+                $changed = true;
+            }
+
+            if (Arr::get($config, 'feed_settings.header_settings.account_to_show') === $oldId) {
+                $config['feed_settings']['header_settings']['account_to_show'] = $newId;
+                $changed = true;
+            }
+
+            if ($changed) {
+                update_post_meta($postId, '_wpsr_template_config', wp_slash(wp_json_encode($config, JSON_UNESCAPED_UNICODE)));
+            }
+        }
     }
 
     protected function formatAuthResultForResponse($result)
@@ -266,6 +440,12 @@ class TiktokFeed extends BaseFeed
 
         $existingData = $sourceList[$userId];
 
+        // The stored token wins: a caller can hold a copy read before a refresh replaced it.
+        $storedToken  = Arr::get($existingData, 'access_token', '');
+        $currentToken = $storedToken
+            ? ($this->protector->decrypt($storedToken) ?: $storedToken)
+            : ($this->protector->decrypt($accessToken) ?: $accessToken);
+
         // Check if we should refresh the token
         if ($this->shouldRefreshToken($existingData)) {
             $refreshToken = Arr::get($existingData, 'refresh_token', '');
@@ -277,7 +457,7 @@ class TiktokFeed extends BaseFeed
 
             // Handle refresh errors
             if (is_array($refreshResult) && isset($refreshResult['error_message'])) {
-                return $this->protector->decrypt($accessToken) ?: $accessToken;
+                return $currentToken;
             }
 
             // Return refreshed token if successful
@@ -288,7 +468,18 @@ class TiktokFeed extends BaseFeed
             return ['error_message' => 'Token refresh failed'];
         }
 
-        return $this->protector->decrypt($accessToken) ?: $accessToken;
+        return $currentToken;
+    }
+
+    /**
+     * The bridge reports the app that issued the token: v2 is the new app, anything else the original one.
+     *
+     * @param mixed $bridgeApp
+     * @return int
+     */
+    protected static function authAppVersion($bridgeApp)
+    {
+        return $bridgeApp === 'v2' ? self::AUTH_APP_VERSION : 1;
     }
 
     public function refreshAccessToken($refreshTokenReceived, $userId)
@@ -298,8 +489,11 @@ class TiktokFeed extends BaseFeed
             return ['error_message' => 'Token refresh unavailable'];
         }
 
+        // The bridge tries the app that issued the token first. An older core ignores the hint.
+        $authApp = (int) Arr::get($this->getConnectedSourceList(), $userId . '.auth_app_version', 0) >= self::AUTH_APP_VERSION ? 'v2' : '';
+
         // Refresh through the wpsn-auth bridge — the TikTok client secret now lives only there.
-        $token = RemoteAuth::refreshAuth('tiktok', 'feed', $refreshTokenReceived);
+        $token = RemoteAuth::refreshAuth('tiktok', 'feed', $refreshTokenReceived, $authApp);
 
         if (is_wp_error($token)) {
             $errorData = [
@@ -325,6 +519,11 @@ class TiktokFeed extends BaseFeed
                 'error_message'   => '', // Clear previous errors
                 'error_code'      => '',
             ];
+
+            $refreshedApp = Arr::get($token, 'app');
+            if (in_array($refreshedApp, ['v1', 'v2'], true)) {
+                $updateData['auth_app_version'] = self::authAppVersion($refreshedApp);
+            }
 
             $this->updateSourceList($userId, $updateData);
             return $token['access_token'];
@@ -1066,6 +1265,12 @@ class TiktokFeed extends BaseFeed
                 $connectedSources = $this->getConnectedSourceList();
                 $this->updateConnectedSourcesStatus($connectedSources, $accountId);
                 $this->cacheHandler->createCache($accountCacheName, $accountData);
+
+                // Accounts connected before union_id was stored: keep it so a reconnect can find them.
+                $unionId = (string) Arr::get($accountData, 'data.user.union_id', '');
+                if ($unionId !== '' && isset($connectedSources[$accountId]) && empty($connectedSources[$accountId]['union_id'])) {
+                    $this->updateSourceList($accountId, ['union_id' => $unionId]);
+                }
             }
         }
 
@@ -1183,28 +1388,38 @@ class TiktokFeed extends BaseFeed
                 if ($feed_type === 'header') {
                     // For header cache, only update header details
                     $page_header_response = $this->getHeaderDetails($account, true);
-                    $this->handleApiError($page_header_response, $connectedSources, $account);
+                    $this->handleApiError($page_header_response, $sourceId);
                 } else {
                     // For feed caches, update both feed and header
                     $accountFeed = $this->getAccountFeed($account, $apiSettings, true);
-                    $this->handleApiError($accountFeed, $connectedSources, $account);
+                    $this->handleApiError($accountFeed, $sourceId);
 
-                    // Update header details
+                    // The feed call may have refreshed and rotated the tokens: read the account again.
+                    $account = Arr::get($this->getConnectedSourceList(), $sourceId, $account);
                     $page_header_response = $this->getHeaderDetails($account, true);
-                    $this->handleApiError($page_header_response, $connectedSources, $account);
+                    $this->handleApiError($page_header_response, $sourceId);
                 }
             }
         }
     }
 
-    private function handleApiError($response, &$connectedSources, $account)
+    private function handleApiError($response, $sourceId)
     {
         $hasApiError = Arr::get($response, 'error.message', '');
-        if ($hasApiError) {
-            $account['username'] = Arr::get($response, 'data.user.display_name', '');
-            $connectedSources = $this->addPlatformApiErrors($response, $connectedSources, $account);
-            update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
+        if (!$hasApiError) {
+            return;
         }
+
+        // Read the sources now, never an earlier copy: that copy can hold tokens a refresh already replaced.
+        $connectedSources = $this->getConnectedSourceList();
+        if (empty($sourceId) || !isset($connectedSources[$sourceId])) {
+            return;
+        }
+
+        $account = $connectedSources[$sourceId];
+        $account['username'] = Arr::get($response, 'data.user.display_name', '');
+        $connectedSources = $this->addPlatformApiErrors($response, $connectedSources, $account);
+        update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
     }
 
     public function clearCache()

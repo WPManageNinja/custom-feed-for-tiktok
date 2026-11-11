@@ -57,9 +57,9 @@ class DashboardNoticeHandler
             $message .= ' ' . $deletionMessage;
         }
 
-        // Core before 4.5.0 ignores `path` and has no per-account Reconnect link, so spell out the old steps in the message.
+        // Core before 4.5.0 ignores `path` and always connects through the old app, so ask for the update first.
         if (defined('WPSOCIALREVIEWS_VERSION') && version_compare(WPSOCIALREVIEWS_VERSION, '4.5.0', '<')) {
-            $message .= ' ' . __('Go to Platforms → TikTok, remove the account and connect it again with the same TikTok account.', 'custom-feed-for-tiktok');
+            $message .= ' ' . __('Update WP Social Ninja to version 4.5.0 or later, then go to Platforms → TikTok and click Reconnect next to each account.', 'custom-feed-for-tiktok');
         }
 
         $notices[] = [
