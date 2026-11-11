@@ -57,6 +57,11 @@ class DashboardNoticeHandler
             $message .= ' ' . $deletionMessage;
         }
 
+        // Core before 4.5.0 ignores `path` and has no per-account Reconnect link, so spell out the old steps in the message.
+        if (defined('WPSOCIALREVIEWS_VERSION') && version_compare(WPSOCIALREVIEWS_VERSION, '4.5.0', '<')) {
+            $message .= ' ' . __('Go to Platforms → TikTok, remove the account and connect it again with the same TikTok account.', 'custom-feed-for-tiktok');
+        }
+
         $notices[] = [
             'type'        => 'warning',
             'title'       => __('Action required: reconnect your TikTok account', 'custom-feed-for-tiktok'),
