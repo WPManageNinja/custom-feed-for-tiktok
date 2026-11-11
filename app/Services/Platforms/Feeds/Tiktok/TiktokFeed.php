@@ -345,6 +345,9 @@ class TiktokFeed extends BaseFeed
     public function getVerificationConfigs()
     {
         $connected_source_list  = $this->getConnectedSourceList();
+        foreach ($connected_source_list as $openId => $source) {
+            $connected_source_list[$openId]['needs_reconnect'] = (int) Arr::get($source, 'auth_app_version', 0) < self::AUTH_APP_VERSION;
+        }
         wp_send_json_success([
             'connected_source_list'  => $connected_source_list,
             'status'                 => true,

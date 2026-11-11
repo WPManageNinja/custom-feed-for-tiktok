@@ -15,7 +15,7 @@ class DashboardNoticeHandler
     /**
      * Date (Y-m-d) the old TikTok app gets deleted. Leave empty to omit it from the notice.
      */
-    const OLD_APP_DELETION_DATE = '2026-11-30';
+    const OLD_APP_DELETION_DATE = '2026-12-15';
 
     /**
      * Ask users to reconnect TikTok accounts authorized against an older TikTok app.
@@ -61,7 +61,12 @@ class DashboardNoticeHandler
             'type'        => 'warning',
             'title'       => __('Action required: reconnect your TikTok account', 'custom-feed-for-tiktok'),
             'message'     => $message,
-            'dismissible' => true,
+            // Core 4.5.0+ shows `group: reconnect` notices as rows of one reconnect card; older core ignores these keys.
+            'group'       => 'reconnect',
+            'label'       => __('TikTok', 'custom-feed-for-tiktok'),
+            'deadline'    => self::OLD_APP_DELETION_DATE,
+            // Core hides a dismissed add-on notice only until reload, so a deadline notice offers no close button.
+            'dismissible' => false,
             'actions'     => [
                 [
                     'label'  => __('Reconnect TikTok Account', 'custom-feed-for-tiktok'),
