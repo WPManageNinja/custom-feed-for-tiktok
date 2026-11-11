@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-11T06:28:30+00:00\n"
+"POT-Creation-Date: 2026-11-11T06:53:01+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: custom-feed-for-tiktok\n"
@@ -42,8 +42,8 @@ msgstr ""
 #. translators: %d: number of TikTok accounts that need to be reconnected
 #: app/Hooks/Handlers/DashboardNoticeHandler.php:46
 #, php-format
-msgid "We have moved Custom Feed for TikTok to a new TikTok app. %d connected TikTok account must be reconnected, otherwise its feed will stop updating. Open the TikTok configuration, remove the account and connect it again."
-msgid_plural "We have moved Custom Feed for TikTok to a new TikTok app. %d connected TikTok accounts must be reconnected, otherwise their feeds will stop updating. Open the TikTok configuration, remove the accounts and connect them again."
+msgid "We have moved Custom Feed for TikTok to a new TikTok app. %d connected TikTok account must be reconnected, otherwise its feed will stop updating."
+msgid_plural "We have moved Custom Feed for TikTok to a new TikTok app. %d connected TikTok accounts must be reconnected, otherwise their feeds will stop updating."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -57,12 +57,12 @@ msgstr ""
 msgid "TikTok"
 msgstr ""
 
-#: app/Hooks/Handlers/DashboardNoticeHandler.php:72
-msgid "Reconnect TikTok Account"
+#: app/Hooks/Handlers/DashboardNoticeHandler.php:67
+msgid "Go to Platforms → TikTok → Reconnect, and sign in with the same TikTok account."
 msgstr ""
 
 #. translators: %s: date the old TikTok app will be deleted
-#: app/Hooks/Handlers/DashboardNoticeHandler.php:98
+#: app/Hooks/Handlers/DashboardNoticeHandler.php:88
 #, php-format
 msgid "The old TikTok app will be deleted on %s. Please reconnect before then."
 msgstr ""

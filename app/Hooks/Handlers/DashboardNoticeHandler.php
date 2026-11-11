@@ -44,8 +44,8 @@ class DashboardNoticeHandler
         $message = sprintf(
             /* translators: %d: number of TikTok accounts that need to be reconnected */
             _n(
-                'We have moved Custom Feed for TikTok to a new TikTok app. %d connected TikTok account must be reconnected, otherwise its feed will stop updating. Open the TikTok configuration, remove the account and connect it again.',
-                'We have moved Custom Feed for TikTok to a new TikTok app. %d connected TikTok accounts must be reconnected, otherwise their feeds will stop updating. Open the TikTok configuration, remove the accounts and connect them again.',
+                'We have moved Custom Feed for TikTok to a new TikTok app. %d connected TikTok account must be reconnected, otherwise its feed will stop updating.',
+                'We have moved Custom Feed for TikTok to a new TikTok app. %d connected TikTok accounts must be reconnected, otherwise their feeds will stop updating.',
                 $outdatedAccounts,
                 'custom-feed-for-tiktok'
             ),
@@ -64,19 +64,9 @@ class DashboardNoticeHandler
             // Core 4.5.0+ shows `group: reconnect` notices as rows of one reconnect card; older core ignores these keys.
             'group'       => 'reconnect',
             'label'       => __('TikTok', 'custom-feed-for-tiktok'),
-            'deadline'    => self::OLD_APP_DELETION_DATE,
+            'path'        => __('Go to Platforms → TikTok → Reconnect, and sign in with the same TikTok account.', 'custom-feed-for-tiktok'),
             // Core hides a dismissed add-on notice only until reload, so a deadline notice offers no close button.
             'dismissible' => false,
-            'actions'     => [
-                [
-                    'label'  => __('Reconnect TikTok Account', 'custom-feed-for-tiktok'),
-                    // ?install=tiktok_feed opens the TikTok configuration modal on the Platforms page.
-                    // The extra query arg forces a full reload, since the notice already sits on that page
-                    // and the modal only opens on mount.
-                    'url'    => admin_url('admin.php?page=wpsocialninja.php&wpsr_reconnect=tiktok#/?install=tiktok_feed'),
-                    'target' => '_self',
-                ],
-            ],
         ];
 
         return $notices;
