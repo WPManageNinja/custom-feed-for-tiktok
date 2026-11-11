@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-10T17:01:23+00:00\n"
+"POT-Creation-Date: 2026-11-11T06:28:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: custom-feed-for-tiktok\n"
@@ -253,64 +253,64 @@ msgstr ""
 msgid "Invalid auth platform response."
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:378
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:381
 msgid "Successfully Disconnected!"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:429
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:432
 msgid "Please select an Account to get feeds."
 msgstr ""
 
 #. translators: %s: Account username or display name
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:459
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:462
 #, php-format
 msgid "There has been a problem with your account (%s). Please reconnect your account."
 msgstr ""
 
 #. translators: %s: Account username or display name
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:464
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:1228
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:467
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:1231
 #, php-format
 msgid "There has been a problem with your account (%s). The user has not authorized application or revoked permission. Please reconnect your account."
 msgstr ""
 
 #. translators: %s: Account username or display name
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:469
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:472
 #, php-format
 msgid "There has been a problem with your account(%s). Your access token is invalid has expired. Please reconnect your account. Otherwise, the feed will no longer work."
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:530
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:533
 msgid "TikTok feeds are not being displayed due to the \"optimize images\" option being disabled. If the GDPR settings are set to \"Yes,\" it is necessary to enable the optimize images option."
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:569
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:572
 msgid "Success"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:604
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:607
 msgid "Template Saved Successfully!!"
 msgstr ""
 
 #. translators: %s: Account ID linked to the configuration
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:661
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:664
 #, php-format
 msgid "The account ID (%s) linked to your configuration has been deleted. To continue displaying your feed from this account, please reauthorize and reconnect it in the configuration settings. Then, go to the template editor, navigate to Source → Select Account, and choose the account again."
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:663
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:666
 msgid "There are multiple accounts being used on this template. "
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:765
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:768
 msgid "Please enter at least one video id"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:1078
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:1081
 msgid "Something went wrong"
 msgstr ""
 
-#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:1202
+#: app/Services/Platforms/Feeds/Tiktok/TiktokFeed.php:1205
 msgid "Cache cleared successfully!"
 msgstr ""
 
