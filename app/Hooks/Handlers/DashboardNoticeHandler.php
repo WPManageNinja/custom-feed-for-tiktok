@@ -59,8 +59,11 @@ class DashboardNoticeHandler
 
         // Core before 4.5.0 ignores `path` and has no per-account Reconnect link, so spell out the old steps in the message.
         if (defined('WPSOCIALREVIEWS_VERSION') && version_compare(WPSOCIALREVIEWS_VERSION, '4.5.0', '<')) {
-            $message .= ' ' . __('Go to Platforms → TikTok, remove the account and connect it again with the same TikTok account.', 'custom-feed-for-tiktok');
+            $message .= ' ' . __('Go to Platforms → TikTok and connect the same TikTok account again.', 'custom-feed-for-tiktok');
         }
+
+        // The new app gives the account a new ID, so templates keep the old account until the user changes them.
+        $message .= ' ' . __('After you reconnect, the account shows as a new account. Select it in each TikTok template that uses the old account, then remove the old account.', 'custom-feed-for-tiktok');
 
         $notices[] = [
             'type'        => 'warning',

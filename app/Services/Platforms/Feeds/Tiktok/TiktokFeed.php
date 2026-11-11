@@ -266,6 +266,12 @@ class TiktokFeed extends BaseFeed
 
         $existingData = $sourceList[$userId];
 
+        // The stored token wins: a caller can hold a copy read before a refresh replaced it.
+        $storedToken  = Arr::get($existingData, 'access_token', '');
+        $currentToken = $storedToken
+            ? ($this->protector->decrypt($storedToken) ?: $storedToken)
+            : ($this->protector->decrypt($accessToken) ?: $accessToken);
+
         // Check if we should refresh the token
         if ($this->shouldRefreshToken($existingData)) {
             $refreshToken = Arr::get($existingData, 'refresh_token', '');
@@ -277,7 +283,7 @@ class TiktokFeed extends BaseFeed
 
             // Handle refresh errors
             if (is_array($refreshResult) && isset($refreshResult['error_message'])) {
-                return $this->protector->decrypt($accessToken) ?: $accessToken;
+                return $currentToken;
             }
 
             // Return refreshed token if successful
@@ -288,7 +294,7 @@ class TiktokFeed extends BaseFeed
             return ['error_message' => 'Token refresh failed'];
         }
 
-        return $this->protector->decrypt($accessToken) ?: $accessToken;
+        return $currentToken;
     }
 
     public function refreshAccessToken($refreshTokenReceived, $userId)
@@ -1183,28 +1189,38 @@ class TiktokFeed extends BaseFeed
                 if ($feed_type === 'header') {
                     // For header cache, only update header details
                     $page_header_response = $this->getHeaderDetails($account, true);
-                    $this->handleApiError($page_header_response, $connectedSources, $account);
+                    $this->handleApiError($page_header_response, $sourceId);
                 } else {
                     // For feed caches, update both feed and header
                     $accountFeed = $this->getAccountFeed($account, $apiSettings, true);
-                    $this->handleApiError($accountFeed, $connectedSources, $account);
+                    $this->handleApiError($accountFeed, $sourceId);
 
-                    // Update header details
+                    // The feed call may have refreshed and rotated the tokens: read the account again.
+                    $account = Arr::get($this->getConnectedSourceList(), $sourceId, $account);
                     $page_header_response = $this->getHeaderDetails($account, true);
-                    $this->handleApiError($page_header_response, $connectedSources, $account);
+                    $this->handleApiError($page_header_response, $sourceId);
                 }
             }
         }
     }
 
-    private function handleApiError($response, &$connectedSources, $account)
+    private function handleApiError($response, $sourceId)
     {
         $hasApiError = Arr::get($response, 'error.message', '');
-        if ($hasApiError) {
-            $account['username'] = Arr::get($response, 'data.user.display_name', '');
-            $connectedSources = $this->addPlatformApiErrors($response, $connectedSources, $account);
-            update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
+        if (!$hasApiError) {
+            return;
         }
+
+        // Read the sources now, never an earlier copy: that copy can hold tokens a refresh already replaced.
+        $connectedSources = $this->getConnectedSourceList();
+        if (empty($sourceId) || !isset($connectedSources[$sourceId])) {
+            return;
+        }
+
+        $account = $connectedSources[$sourceId];
+        $account['username'] = Arr::get($response, 'data.user.display_name', '');
+        $connectedSources = $this->addPlatformApiErrors($response, $connectedSources, $account);
+        update_option('wpsr_tiktok_connected_sources_config', array('sources' => $connectedSources));
     }
 
     public function clearCache()
