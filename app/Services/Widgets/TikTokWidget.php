@@ -637,13 +637,13 @@ class TikTokWidget extends Widget_Base
      */
     protected function render() {
         $settings = $this->get_settings_for_display();
-        extract($settings);
-        if(!empty($tiktok_feed_template_list)){
+        $wpsr_template_id = absint(Arr::get($settings, 'tiktok_feed_template_list'));
+        if(!empty($wpsr_template_id)){
             $postId  = get_the_ID();
             if ($postId) {
                 Helper::saveTemplateMeta($postId, 'tt');
             }
-            echo wp_kses_post(do_shortcode('[wp_social_ninja id="' . $tiktok_feed_template_list . '" platform="tiktok"]'));
+            echo wp_kses_post(do_shortcode('[wp_social_ninja id="' . $wpsr_template_id . '" platform="tiktok"]'));
         }
     }
 
