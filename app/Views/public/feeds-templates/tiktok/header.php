@@ -1,6 +1,7 @@
 <?php
 
 use CustomFeedForTiktok\Application\Services\Platforms\Feeds\Tiktok\Helper as TiktokHelper;
+use WPSocialReviews\App\Services\Helper as GlobalHelper;
 use WPSocialReviews\Framework\Support\Arr;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,9 +44,10 @@ $wpsr_tiktok_profile_photo_hide_class = $wpsr_tiktok_display_profile_photo === '
 $wpsr_tiktok_display_header = Arr::get($wpsr_tiktok_header_settings, 'display_header'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 $wpsr_tiktok_header_layout_class = TiktokHelper::getHeaderLayoutClass($feed_settings); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+$wpsr_tiktok_slider_pre_init_style = defined('WPSOCIALREVIEWS_PRO') ? GlobalHelper::getSliderPreInitStyle($wpsr_tiktok_slider_data) : ''; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 echo '<div  id="wpsr-tiktok-feed-' . esc_attr($templateId) . '" class="' . esc_attr(implode(' ', $wpsr_tiktok_classes)) . '" ' . esc_attr(implode(' ',
-        $wpsr_tiktok_data_attrs)) . '  data-column="' . esc_attr($wpsr_tiktok_desktop_column_number) . '">';
+        $wpsr_tiktok_data_attrs)) . '  data-column="' . esc_attr($wpsr_tiktok_desktop_column_number) . '"' . ($wpsr_tiktok_slider_pre_init_style ? ' style="' . esc_attr($wpsr_tiktok_slider_pre_init_style) . '"' : '') . '>';
 echo '<div class="wpsr-loader">
         <div class="wpsr-spinner-animation"></div>
     </div>';
