@@ -16,6 +16,20 @@ use WPSocialReviews\App\Hooks\Handlers\ShortcodeHandler;
 
 class TiktokTemplateHandler
 {
+    private static $gdprSettings = null;
+
+    /**
+     * Every TiktokFeed instance registers its own hooks, so build one per request, not one per post.
+     */
+    private function getGdprSettings()
+    {
+        if (self::$gdprSettings === null) {
+            self::$gdprSettings = (new TiktokFeed())->getGdprSettings('tiktok');
+        }
+
+        return self::$gdprSettings;
+    }
+
     /**
      *
      * Render parent opening div for the template item
@@ -82,16 +96,10 @@ class TiktokTemplateHandler
 
     public function renderFeedMedia($feed = [], $template_meta = [])
     {
-        $gdpr_settings = [];
-        $tiktokFeed = new TiktokFeed();
-        if (method_exists($tiktokFeed, 'getGdprSettings')) {
-            $gdpr_settings = (new TiktokFeed())->getGdprSettings('tiktok');
-        }
-
         $html = $this->loadView('public/feeds-templates/tiktok/elements/media', array(
             'feed'          => $feed,
             'template_meta' => $template_meta,
-            'image_settings' => $gdpr_settings
+            'image_settings' => $this->getGdprSettings()
         ));
         echo wp_kses_post($html);
     }
@@ -114,7 +122,7 @@ class TiktokTemplateHandler
         $pagination_settings = $shortcodeHandler->formatPaginationSettings($feed);
         $sinceId = (($page - 1) * $pagination_settings['paginate']);
         $maxId = ($sinceId + $pagination_settings['paginate']) - 1;
-        $gdpr_settings = (new TiktokFeed())->getGdprSettings('tiktok');
+        $gdpr_settings = $this->getGdprSettings();
 
         $template_body_data = [
             'templateId'    => $templateId,
