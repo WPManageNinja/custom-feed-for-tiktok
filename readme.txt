@@ -4,7 +4,7 @@ Tags: TikTok feed, tiktok feed wordpress, tiktok gallery plugin, TikTok plugin, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.6
+Stable tag: 1.2.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -187,6 +187,10 @@ The free version includes a responsive Grid layout. The Pro version has Masonry 
 7. 100% responsive on desktop, tablet, and mobile devices
 
 == Changelog ==
+
+1.2.7
+- Improved TikTok sliders to show videos on first load, before the carousel starts.
+- Fixed issues identified during the internal security audit.
 
 1.2.6
 - Moved Custom Feed for TikTok to a new TikTok app. The old TikTok app will be deleted on December 15, 2026, so TikTok accounts connected before this update must be reconnected to keep their feeds updating.
