@@ -85,7 +85,8 @@ class TikTokWidget extends Widget_Base
                 'label' => __('Select a Template', 'custom-feed-for-tiktok'),
                 'type' => Controls_Manager::SELECT,
                 'label_block' => true,
-                'options' => Helper::getTemplates($platforms),
+                // Built whenever the widget renders, but only the editor shows it, so visitors skip the query.
+                'options' => is_user_logged_in() ? Helper::getTemplates($platforms) : array(),
                 'default' => '0',
             ]
         );
