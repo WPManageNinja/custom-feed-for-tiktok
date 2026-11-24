@@ -69,7 +69,8 @@ FLBuilder::register_module('CFFT_Fl_TikTok_Module', array(
                     'template_id'  => array(
                         'type'         => 'select',
                         'label'        => __( 'Select a Template', 'custom-feed-for-tiktok' ),
-                        'options'      => Helper::getTemplates(['tiktok'])
+                        // Registered on every page, but only the editor shows it, so visitors skip the query.
+                        'options'      => is_user_logged_in() ? Helper::getTemplates(['tiktok']) : array()
                     ),
                 )
             )
