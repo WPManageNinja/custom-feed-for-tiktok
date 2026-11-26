@@ -9,7 +9,7 @@ define('CUSTOM_FEED_FOR_TIKTOK_VERSION', '1.2.8');
 define('CUSTOM_FEED_FOR_TIKTOK', true);
 define('CUSTOM_FEED_FOR_TIKTOK_URL', plugin_dir_url(__FILE__));
 define('CUSTOM_FEED_FOR_TIKTOK_DIR', plugin_dir_path(__FILE__));
-define('CUSTOM_FEED_FOR_TIKTOK_MIN_WPSR_VERSION', '4.5.1');
+define('CUSTOM_FEED_FOR_TIKTOK_MIN_WPSR_VERSION', '4.5.2');
 
 spl_autoload_register(function ($class){
     $match = 'CustomFeedForTiktok';
