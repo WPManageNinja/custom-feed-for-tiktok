@@ -607,7 +607,7 @@ class TiktokFeed extends BaseFeed
         }
 
         $encodedMeta = json_encode($settings, JSON_UNESCAPED_UNICODE);
-        update_post_meta($postId, '_wpsr_template_config', $encodedMeta);
+        update_post_meta($postId, '_wpsr_template_config', wp_slash($encodedMeta));
 
         $this->cacheHandler->clearPageCaches($this->platform);
         wp_send_json_success([
